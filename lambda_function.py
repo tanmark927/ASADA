@@ -158,6 +158,17 @@ def help_asada():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
     
+def death_alert():
+    session_attributes = {}
+    card_title = "911 emergency function"
+    speech_output = "Please call 911 or the sucide hotline 1 800 273 8255"
+    reprompt_text = "I did not understand your command. " \
+        "You can say take a test, give me an advice or just talk."
+    should_end_session = False
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
+
+
 #TODO FOR ASADA: change intents to be appropriate with our functions
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
@@ -177,6 +188,8 @@ def on_intent(intent_request, session):
     #    return MusicAction(intent, session);    
     if intent_name == "AMAZON.HelpIntent":
         return help_asada()
+    elif intent_name == "DeathAlert":
+        return death_alert()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
     #elif intent_name == "AMAZON.PauseIntent" or intent_name == "AMAZON.ResumeIntent"
