@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ASADA_Client</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_home_page">HomePage</string>
+    <string name="title_activity_account_page">AccountPage</string>
+    <string name="title_activity_chat_history">ChatHistory</string>
+</resources>
