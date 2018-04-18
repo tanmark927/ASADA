@@ -29,6 +29,7 @@
 			<li><a href="asadadeveloperguidelines.html#features">Features</a></li>
 			<li><a href="asadadeveloperguidelines.html#howto">How to Install</a></li>
 			<li><a href="asadadeveloperguidelines.html#compdep">Components and Dependencies</a></li>
+			<li><a href="asadadeveloperguidelines.html#contribute">How to Contribute</a></li>
 			<li><a href="asadadeveloperguidelines.html#doc">Documentation</a></li>
 			<li><a href="asadadeveloperguidelines.html#faq">Frequently Asked Questions</a></li>
 		</ul>
@@ -94,23 +95,51 @@
 		<p>
 			Technologies:
 			<ul>
-				<li>Amazon Alexa Skill</li>
-				<li>Amazon RDS Database in MySQL</li>
-				<li>Amazon ECS</li>
-				<li>Android Studio</li>
-				<li>Amazon Lambda in Python</li>
+				<li><a href = "https://developer.amazon.com/alexa-skills-kit">Amazon Alexa Skill</a></li>
+				<li><a href = "https://aws.amazon.com/rds/">Amazon RDS Database in MySQL</a></li>
+				<li><a href = "https://aws.amazon.com/ec2/">Amazon ECS</a></li>
+				<li><a href = "https://developer.android.com/studio/index.html">Android Studio</a></li>
+				<li><a href = "https://aws.amazon.com/lambda/Amazon">AWS Lambda</a></li>
+				<li><a href = "https://www.python.org/">Python</a></li>
 			</ul>
 		</p>
 
 		<p><a href="asadadeveloperguidelines.html#table">Return to Table of Contents</a></p>
-
+		
+		<h2><a name="contribute">How to Contribute</a></h2>
+		<p>
+			You can contribute to this by going to our <a href = "https://github.com/tanmark927/ASADA">Github page.</a></br>
+			<b>We encourage that you create your own branch, and create any pull requests for us to review</b></br></br>
+			The current issues can be viewed on our <a href = "https://github.com/tanmark927/ASADA/issues">Issues page.</a>
+			</br></br></br>
+			You first need an <b>AWS developer account and an Amazon account</b>. (they both have different set up processes) </br>
+			You then need to set up instances of Lambda, and RDS. Set the constraints so that it is running on Linux and MYSQL instances for RDS.</br>
+			You can copy over our SQL code from the github to build the RDS database. You can follow this <a href = "https://aws.amazon.com/premiumsupport/knowledge-center/connect-rds-mysql-workbench/">tutorial</a> to connect to your RDS database from mySQL workbench. Be sure to open port 3306 in your security groups.</br>
+			Then, you need to create an Alexa Skill for the testing. Then you need to link both the Lambda function and The Skill. Amazon has a great tutorial for this. <a href ="https://developer.amazon.com/alexa-skills-kit/alexa-skill-quick-start-tutorial">Tutorial</a></br>
+			You can copy our JSON code to the Alexa Skill, and our Python code to the Lambda function.</br>
+			</br>
+			If you do not want to follow the steps, we can provide AWS accounts on contact with us at <a href ="mailto:asadadasadadepression@gmail?Subject=AWS%20Information%20Request">asadadepression@gmail.com</a></br>
+			But be warned, we do not give this out to anybody.
+		</p>
+		<p><a href="asadadeveloperguidelines.html#table">Return to Table of Contents</a></p>
+		
 		<h2><a name="doc">Documentation</a></h2>
 		<p>All of our documentations and diagrams can be viewed in our <a target="Google Drive" href="https://drive.google.com/drive/folders/13Vio4mdr_NeJLkNqxEG-Jii6cMtHJoQI?usp=sharing">Google Drive</a></p>
 
 		<p><a href="asadadeveloperguidelines.html#table">Return to Table of Contents</a></p>
 
 		<h2><a name="faq">Frequently Asked Questions</a></h2>
-		<p>faq section here</p>
+		<h4>How was the database connected to that application?</h4>
+		<p>The lambda function connects to an ECC server in order to communicate with RDS.</p>
+		
+		<h4>I cannot connect to my RDS database. Help?!</h4>
+		<p>You have to set the security group to accept inbounds and outbounds of port 3306. That way, MySQL will be able to connect</p>
+		
+		<h4>My Alexa function is failing to run</h4>
+		<p>There is an error in the Lambda function. You need to check your code over, and ensure there is not any errors.</br>
+		If you are confident there are no errors, check that your Lambda function is connected to your Alexa Skill</p>
+		
+		
 
 		<p><a href="asadadeveloperguidelines.html#table">Return to Table of Contents</a></p>
 
