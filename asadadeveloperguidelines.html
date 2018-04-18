@@ -1,114 +1,129 @@
-
 <!DOCTYPE html>
-<!-- saved from url=(0079)http://web.csulb.edu/~grodrigu/cecs110/queeryusermanual/queery_user_manual.html -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<link rel="stylesheet" href="">
-<title>ASADA DEVELOPER GUIDELINES</title>
-<style type="text/css">
-body{
-	width: 80%;
-	margin: auto;
-	}
-h2{
-	font-size: 180%;
-	border-bottom: double;
-}
-</style></head>
-<body>
-	<div id="main" style="text-align: center">
-	<header><h1>ASADA - Alexa Support Anti Depression Application</h1></header>
-	<h1>Developer Guide</h1>
-	<image src="https://i.imgur.com/4Nwe0ix.png" alt="ASADAlogo">
-</div>
-<!-- <h2><a name="table">Table of Contents</a></h2><a name="table">
-</a><ul><a name="table">
-<li><a href="">Introduction</a></li>
-</ul> -->
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" href="">
+		<title>ASADA DEVELOPER GUIDELINES</title>
+		<style type="text/css">
+			body{
+				width: 80%;
+				margin: auto;
+			}
+			h2{
+				font-size: 180%;
+				border-bottom: double;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="main" style="text-align: center">
+			<header><h1>ASADA - Alexa Support Anti Depression Application</h1></header>
+			<h1>Developer Guide</h1>
+			<image src="https://i.imgur.com/4Nwe0ix.png" alt="ASADAlogo">
+		</div>
+		<h2><a name="table">Table of Contents</a></h2><a name="table">
+		</a><ul><a name="table">
+			<li><a href="asadadeveloperguidelines.html#intro">What is this project?</a></li>
+			<li><a href="asadadeveloperguidelines.html#latest">The Latest Version</a></li>
+			<li><a href="asadadeveloperguidelines.html#features">Features</a></li>
+			<li><a href="asadadeveloperguidelines.html#howto">How to Install</a></li>
+			<li><a href="asadadeveloperguidelines.html#compdep">Components and Dependencies</a></li>
+			<li><a href="asadadeveloperguidelines.html#doc">Documentation</a></li>
+			<li><a href="asadadeveloperguidelines.html#faq">Frequently Asked Questions</a></li>
+		</ul>
 
-<h2><a name="intro">What is this project?</a></h2>
-<p>ASADA is an <b>A</b>lexa <b>S</b>upport <b>A</b>nti-<b>D</b>epression <b>A</b>pplication that aims to help alleviate people suffering from depression. It is an artificial intelligence application that is built on the Alexa Skill Kit. The main purpose of this project is to help users cope with struggling with depression and lower their depression levels by talking to Alexa on a daily basis.</p>
+		<h2><a name="intro">What is this project?</a></h2>
+		<p>ASADA is an <b>A</b>lexa <b>S</b>upport <b>A</b>nti-<b>D</b>epression <b>A</b>pplication that aims to help alleviate people suffering from depression. It is an artificial intelligence application that is built on the Alexa Skill Kit. The main purpose of this project is to help users cope with struggling with depression and lower their depression levels by talking to Alexa on a daily basis.</p>
 
-<h2>The Latest Version</h2>
-<p>
-The latest version can be found on our <a target= "_blank" href = "https://github.com/tanmark927/ASADA
-">github page</a>
-</p>
+		<p><a href="asadadeveloperguidelines.html#table">Return to Table of Contents</a></p>
 
-<h2>Features </h2>
-<p style = "font-size: 140%">
-Main Alexa Application:
-<ul>
-	<li>Talk to Alexa about your day, and Alexa will respond based on responses </li>
-	<li>Take a Depression Index Quiz that gives a score of users' depression levels </li>
-	<li>Alexa will check up on user often, based on time intervals set</li>
-	<li>Alexa will record responses to a database </li>
-</ul>
-</p>
-<p style = "font-size: 140%">
-Android Application:
-<ul>
-	<li>View chat history logs</li>
-	<li>Refresh to up-to-date status of database</li>
-	<li>Customize user profiles</li>
-	
-</ul>
-</p>
+		<h2><a name="latest">The Latest Version</a></h2>
+		<p>The latest version can be found on our <a target= "_blank" href = "https://github.com/tanmark927/ASADA">github page</a></p>
 
-<h2>How to install</h2>
-<p style = "font-size: 140%">
-Alexa Application:
-<ul>
-	<li>Go to the menu and select <b>Skills</b> or go to the Alexa Skills store on the <a target ="_blank" href ="https://www.amazon.com/skills">Amazon website</a></li>
-	<li>In the search bar, type in ASADA</li>
-	<li>Navigate down, and select the skill detail page.</li>
-	<li>Select the <b>Enable Skill</b> option and ask Alexa to open the skill</b>
-</ul>
-To manage your skills:
-<ul>
-	<li>Go to the menu and select <b>Skills</b></li>
-	<li>Select <b>Your Skills</b> at the top of the screen</li>
-</ul>
-</p>
-<p style = "font-size: 140%">
-Android Application: 
-<ul>
-	<li>Download the APK file from our <a target= "_blank" href = "https://github.com/tanmark927/ASADA
-">github page</a> onto your Android Device</li>
-	<li>! Be sure you allow unknown apk files installation settings turned on !</li>
-	<li>Navigate to where you downloaded the file, and press on the file to begin installiation</li>
-</ul>
-</p>
+		<p><a href="asadadeveloperguidelines.html#table">Return to Table of Contents</a></p>
 
+		<h2><a name="features">Features</a></h2>
+		<p style = "font-size: 140%">
+			Main Alexa Application:
+			<ul>
+				<li>Talk to Alexa about your day, and Alexa will respond based on responses </li>
+				<li>Take a Depression Index Quiz that gives a score of users' depression levels </li>
+				<li>Alexa will check up on user often, based on time intervals set</li>
+				<li>Alexa will record responses to a database </li>
+			</ul>
+		</p>
+		<p style = "font-size: 140%">
+			Android Application:
+			<ul>
+				<li>View chat history logs</li>
+				<li>Refresh to up-to-date status of database</li>
+				<li>Customize user profiles</li>	
+			</ul>
+		</p>
 
-<h2>Components and Dependencies</h2>
-<p>
-	Technologies:
-	<ul>
-		<li>Amazon Alexa Skill</li>
-		<li>Amazon RDS Database in MySQL</li>
-		<li>Amazon ECS</li>
-		<li>Android Studio</li>
-		<li>Amazon Lambda in Python</li>
-	</ul>
-</p>
+		<p><a href="asadadeveloperguidelines.html#table">Return to Table of Contents</a></p>
 
-<h2>Documentation</h2>
-<p>
-All of our documentations and diagrams can be viewed in our <a target="Google Drive" href="https://drive.google.com/drive/folders/13Vio4mdr_NeJLkNqxEG-Jii6cMtHJoQI?usp=sharing">Google Drive</a>
-</p>
+		<h2><a name="howto">How to Install</a></h2>
+		<p style = "font-size: 140%">
+			Alexa Application:
+			<ul>
+				<li>Go to the menu and select <b>Skills</b> or go to the Alexa Skills store on the <a target ="_blank" href ="https://www.amazon.com/skills">Amazon website</a></li>
+				<li>In the search bar, type in ASADA</li>
+				<li>Navigate down, and select the skill detail page.</li>
+				<li>Select the <b>Enable Skill</b> option and ask Alexa to open the skill</b>
+			</ul>
+			To manage your skills:
+			<ul>
+				<li>Go to the menu and select <b>Skills</b></li>
+				<li>Select <b>Your Skills</b> at the top of the screen</li>
+			</ul>
+		</p>
+		<p style = "font-size: 140%">
+			Android Application: 
+			<ul>
+				<li>Download the APK file from our <a target= "_blank" href = "https://github.com/tanmark927/ASADA">github page</a> onto your Android Device</li>
+				<li>! Be sure you allow unknown apk files installation settings turned on !</li>
+				<li>Navigate to where you downloaded the file, and press on the file to begin installiation</li>
+			</ul>
+		</p>
 
-<h2>Maintainers</h2>
-<p>
-	Current Maintainers:
-	<ul>
-		<li><a target="Brian Pham" href="https://github.com/bpbrianpham">Brian Pham</a></li>
-		<li><a target="Harry Hoang" href="https://github.com/harryhoang96">Harry Hoang</a></li>
-		<li><a target="Hung Mach" href="https://github.com/hungmch95">Hung Mach</a></li>
-		<li><a target="Mark Tan" href="https://github.com/tanmark927">Mark Tan</a></li>
-	</ul>
-</p>
+		<p><a href="asadadeveloperguidelines.html#table">Return to Table of Contents</a></p>
 
+		<h2><a name="compdep">Components and Dependencies</a></h2>
+		<p>
+			Technologies:
+			<ul>
+				<li>Amazon Alexa Skill</li>
+				<li>Amazon RDS Database in MySQL</li>
+				<li>Amazon ECS</li>
+				<li>Android Studio</li>
+				<li>Amazon Lambda in Python</li>
+			</ul>
+		</p>
 
-<footer>Copyright @2018 ASADA. All Rights Reserved.</footer>
-</body></html>
+		<p><a href="asadadeveloperguidelines.html#table">Return to Table of Contents</a></p>
+
+		<h2><a name="doc">Documentation</a></h2>
+		<p>All of our documentations and diagrams can be viewed in our <a target="Google Drive" href="https://drive.google.com/drive/folders/13Vio4mdr_NeJLkNqxEG-Jii6cMtHJoQI?usp=sharing">Google Drive</a></p>
+
+		<p><a href="asadadeveloperguidelines.html#table">Return to Table of Contents</a></p>
+
+		<h2><a name="faq">Frequently Asked Questions</a></h2>
+		<p>faq section here</p>
+
+		<p><a href="asadadeveloperguidelines.html#table">Return to Table of Contents</a></p>
+
+		<h2>Maintainers</h2>
+		<p>
+			Current Maintainers:
+			<ul>
+				<li><a target="Brian Pham" href="https://github.com/bpbrianpham">Brian Pham</a></li>
+				<li><a target="Harry Hoang" href="https://github.com/harryhoang96">Harry Hoang</a></li>
+				<li><a target="Hung Mach" href="https://github.com/hungmch95">Hung Mach</a></li>
+				<li><a target="Mark Tan" href="https://github.com/tanmark927">Mark Tan</a></li>
+			</ul>
+		</p>
+		<footer>Copyright @2018 ASADA. All Rights Reserved.</footer>
+	</body>
+</html>
