@@ -3,7 +3,7 @@ import logging
 import rds_config
 import pymysql
 #rds settings
-rds_host  = "arn:aws:rds:us-east-1:113457996236:db:asada"
+rds_host  = "asada.cofr9vg9xjlm.us-east-1.rds.amazonaws.com"
 name = rds_config.db_username
 password = rds_config.db_password
 db_name = rds_config.db_name
@@ -36,7 +36,7 @@ def handler(event, context):
         for row in cur:
             item_count += 1
             logger.info(row)
-            #print(row)
+            print(row)
     
 
     return "Added %d items from RDS MySQL table" %(item_count)
