@@ -102,15 +102,17 @@
 
 		<h2><a name="compdep">Components and Dependencies</a></h2>
 		<p>
-			Technologies:
-			<ul>
-				<li><a href = "https://developer.amazon.com/alexa-skills-kit">Amazon Alexa Skill</a></li>
-				<li><a href = "https://aws.amazon.com/rds/">Amazon RDS Database in MySQL</a></li>
-				<li><a href = "https://aws.amazon.com/ec2/">Amazon ECS</a></li>
-				<li><a href = "https://developer.android.com/studio/index.html">Android Studio</a></li>
-				<li><a href = "https://aws.amazon.com/lambda/Amazon">AWS Lambda</a></li>
-				<li><a href = "https://www.python.org/">Python</a></li>
-			</ul>
+			We used the <a href = "https://developer.amazon.com/alexa-skills-kit">Alexa Skill Kit</a> to create the Alexa app. From there, we used the development GUI 
+			to create our intents and sample utterances. From there, we connected the Alexa app to an <a href = "https://aws.amazon.com/lambda/Amazon">AWS Lambda</a> function. 
+			In the Lambda function, we are programming with the <a href = "https://www.python.org/">Python</a> language, along with <a href = "https://pymysql.readthedocs.io/en/latest/">PyMySQL</a> 
+			to connect to our database. The database is built on <a href = "https://aws.amazon.com/rds/">Amazon RDS</a>, since we wanted to stick with strictly 
+			Amazon Web Services. From our understanding, how the Alexa program works is that Alexa will listen to commands over voice, and figures out the utterance 
+			or intent on its own, and sends the intent command to Lambda. From Lambda, it will generate the response there and will access the database with our PyMySQL 
+			dependency. Then Lambda sends back the response of the utterance to Alexa, and Alexa will speak out the response. We also used <a href = "https://developer.android.com/studio/index.html">Android Studio 3.1.1</a> 
+			to create our android app, which is based on <a href = "http://www.oracle.com/technetwork/java/javase/downloads/jdk10-downloads-4416644.html">Java</a> and the Android 
+			development kit. 
+				
+			
 		</p>
 
 		<p><a href="asadadeveloperguidelines.html#table">Return to Table of Contents</a></p>
