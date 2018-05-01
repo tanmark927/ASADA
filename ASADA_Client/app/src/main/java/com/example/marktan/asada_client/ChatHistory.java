@@ -108,6 +108,10 @@ public class ChatHistory extends AppCompatActivity {
                 if (result == null) {
                     return;
                 }
+                // TODO
+                // save user input into client
+                // so CLIENT MUST listen to user input live
+                // print each into a chat bubble
 
                 // Do a toast
                 Toast.makeText(ChatHistory.this, result.getCookie(), Toast.LENGTH_LONG).show();
