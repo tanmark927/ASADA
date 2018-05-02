@@ -1,6 +1,7 @@
 package com.example.marktan.asada_client;
 
 import android.content.Intent;
+import android.content.pm.PackageInstaller;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -17,6 +18,8 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.mobileconnectors.lambdainvoker.*;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.regions.Regions;
+
+import java.lang.annotation.RetentionPolicy;
 
 class RequestClass {
     String type;
@@ -35,6 +38,205 @@ class RequestClass {
 
     public RequestClass() {}
 }
+
+//THIS IS POTENTIAL ASADA CODE
+class OutputSpeech{
+    public String getSpeechtype() {
+        return speechtype;
+    }
+
+    public void setSpeechtype(String speechtype) {
+        this.speechtype = speechtype;
+    }
+
+    String speechtype;
+
+    public String getSpeechtext() {
+        return speechtext;
+    }
+
+    public void setSpeechtext(String speechtext) {
+        this.speechtext = speechtext;
+    }
+
+    String speechtext;
+
+    public OutputSpeech() {}
+    public OutputSpeech(String type, String text)
+    {
+        this.speechtype = type;
+        this.speechtext = text;
+    }
+}
+
+class Card{
+    public String getSpeechtype() {
+        return speechtype;
+    }
+
+    public void setSpeechtype(String speechtype) {
+        this.speechtype = speechtype;
+    }
+
+    String speechtype;
+
+    public String getSpeechtitle() {
+        return speechtitle;
+    }
+
+    public void setSpeechtitle(String speechtitle) {
+        this.speechtitle = speechtitle;
+    }
+
+    String speechtitle;
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    String content;
+
+    public Card() {}
+    public Card(String sType, String sTitle, String c)
+    {
+        this.speechtype = sType;
+        this.speechtitle = sTitle;
+        this.content = c;
+    }
+}
+
+class Reprompt{
+    public OutputSpeech getOs() {
+        return os;
+    }
+
+    public void setOs(OutputSpeech os) {
+        this.os = os;
+    }
+
+    OutputSpeech os;
+
+    public Reprompt() {}
+    public Reprompt(OutputSpeech os){
+        this.os = os;
+    }
+
+}
+
+class SessionAttribute{
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    String key;
+
+    public String getVal() {
+        return val;
+    }
+
+    public void setVal(String val) {
+        this.val = val;
+    }
+
+    String val;
+
+    public SessionAttribute() {}
+    public SessionAttribute(String k, String v)
+    {
+        this.key = k;
+        this.val = v;
+    }
+
+}
+
+class Speechlet{
+    OutputSpeech os;
+    Card c;
+    Reprompt re;
+    boolean shouldEndSession;
+
+    public Speechlet() {}
+    public Speechlet(OutputSpeech os, Card c, Reprompt re, boolean ses)
+    {
+        this.os = os;
+        this.c = c;
+        this.re = re;
+        this.shouldEndSession = ses;
+    }
+    public OutputSpeech getOutput() {
+        return this.os;
+    }
+
+    public void setOutput(OutputSpeech s) { this.os = s; }
+
+    public Card getCard() {
+        return this.c;
+    }
+
+    public void setCard(Card c) {
+        this.c = c;
+    }
+
+    public Reprompt getReprompt() {
+        return this.re;
+    }
+
+    public void setReprompt(Reprompt r) { this.re = r; }
+
+    public boolean getSES() {
+        return this.shouldEndSession;
+    }
+
+    public void setSES(boolean ses) {
+        this.shouldEndSession = ses;
+    }
+}
+
+class Response2{
+    String version;
+    SessionAttribute sa;
+    Speechlet resp;
+
+    public Response2() {}
+    public Response2(String v, SessionAttribute sa, Speechlet r)
+    {
+        this.version = v;
+        this.sa = sa;
+        this.resp = r;
+    }
+
+    public String getVer() {
+        return this.version;
+    }
+
+    public void setVer(String v) {
+        this.version = v;
+    }
+
+    public SessionAttribute getSessAtt() {
+        return this.sa;
+    }
+
+    public void setSessAtt(SessionAttribute s) { this.sa = s; }
+
+    public Speechlet getResp() {
+        return this.resp;
+    }
+
+    public void setCookie(Speechlet r) {
+        this.resp = r;
+    }
+}
+
+////
 
 class ResponseClass {
     String cookie;
@@ -56,7 +258,7 @@ class ResponseClass {
 
 interface MyInterface {
     @LambdaFunction
-        ResponseClass ASADA(RequestClass request);
+        Response2 ASADA(RequestClass request);
 }
 
 public class ChatHistory extends AppCompatActivity {
@@ -85,11 +287,11 @@ public class ChatHistory extends AppCompatActivity {
 
         final MyInterface myInterface = factory.build(MyInterface.class);
 
-        RequestClass request = new RequestClass("FortuneCookie");
+        RequestClass request = new RequestClass("LaunchRequest");
 
-        new AsyncTask<RequestClass, Void, ResponseClass>() {
+        new AsyncTask<RequestClass, Void, Response2>() {
             @Override
-            protected ResponseClass doInBackground(RequestClass... params) {
+            protected Response2 doInBackground(RequestClass... params) {
                 // invoke "echo" method. In case it fails, it will throw a
                 // LambdaFunctionException.
                 try {
@@ -104,7 +306,7 @@ public class ChatHistory extends AppCompatActivity {
             }
 
             @Override
-            protected void onPostExecute(ResponseClass result) {
+            protected void onPostExecute(Response2 result) {
                 if (result == null) {
                     return;
                 }
@@ -114,7 +316,7 @@ public class ChatHistory extends AppCompatActivity {
                 // print each into a chat bubble
 
                 // Do a toast
-                Toast.makeText(ChatHistory.this, result.getCookie(), Toast.LENGTH_LONG).show();
+                Toast.makeText(ChatHistory.this, result.getResp().getOutput().getSpeechtext(), Toast.LENGTH_LONG).show();
             }
         }.execute(request);
 
