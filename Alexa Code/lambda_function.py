@@ -2,6 +2,7 @@ from __future__ import print_function
 import sys
 import logging
 import pymysql
+import datetime
 
 #rds settings
 rds_host  = "asada.cofr9vg9xjlm.us-east-1.rds.amazonaws.com"
@@ -21,11 +22,18 @@ except:
 
 logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
 
+
 # --------------- Helpers that build all of the responses ----------------------
 
-def write_to_db(table, userID, outgoing, message):
-    command = "INSERT INTO 'Conversation' (UserID, outgoing, dateSent, message) VALUES ('" + str(userID) + "', '" + str(outgoing) + "', GETDATE(), '" + str(message) + "')"
-    conn.cursor().execute(command)
+def write_to_conversation(userID, outgoing, message):
+    #command = "INSERT INTO 'Conversation' (UserID, outgoing, dateSent, message) VALUES ('" + str(userID) + "', '" + str(outgoing) + "', GETDATE(), '" + str(message) + "')"
+    with conn.cursor() as cursor:
+        now = datetime.datetime.now()
+        date = now.strftime("%Y-%m-%d")
+        sql = "INSERT INTO Conversation (UserID, outgoing, dateSent, message) VALUES ({0}, {1}, '{2}', '{3}');".format(userID, outgoing, date, message)
+        #print(sql)
+        cursor.execute(sql)
+    conn.commit()
 
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
     return {
@@ -191,7 +199,7 @@ def death_alert():
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
-    write_to_conversation(2222, False, speech_output)
+    write_to_conversation(2222, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
