@@ -23,10 +23,6 @@ logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
 
 # --------------- Helpers that build all of the responses ----------------------
 
-def write_to_db(table, userID, outgoing, message):
-    command = "INSERT INTO '" + str(table) + "' VALUES ('', '" + str(userID) + "', '" + str(outgoing) + "', GETDATE(), '" + str(message) + "')"
-    conn.cursor().execute(command)
-
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
     return {
         'outputSpeech': {
@@ -88,14 +84,14 @@ def handle_session_end_request():
     return build_response({}, build_speechlet_response(
         card_title, speech_output, None, should_end_session))
 
-'''
+
 #TODO FOR ASADA: change intents to be appropriate with our functions
 def create_favorite_color_attributes(favorite_color):
     return {"favoriteColor": favorite_color}
 
 #TODO FOR ASADA: change intents to be appropriate with our functions
 def AdviceGiverAction(intent, session):
-    
+
     card_title = intent['name']
     session_attributes = {}
     should_end_session = False
@@ -146,11 +142,11 @@ def MusicAction(intent, session):
     # understood, the session will end.
     return build_response(session_attributes, build_speechlet_response(
         intent['name'], speech_output, reprompt_text, should_end_session))
-    
+
 #TODO: fill out logic for pause and resume intent
 def do_something():
     return 0;
-'''
+
 
 # --------------- Events ------------------
 
@@ -179,38 +175,19 @@ def help_asada():
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
-    
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
-    
+
 def death_alert():
-    #emergency suicide alert
     session_attributes = {}
     card_title = "911 emergency function"
     speech_output = "Please call 911 or the sucide hotline 1 800 273 8255"
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
-    write_to_db('Conversation', 2222, False, speech_output)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
-#TODO: implement count, grab from the database. return a random choice from the size
-def fortune_cookie():
-    #test run to grab a fortune cookie
-    session_attributes = {}
-    card_title = "Fortune Cookie"
-    result = ""
-    with conn.cursor() as cur:
-        cur.execute("select FC_Message from FortuneCookie ORDER BY RAND() LIMIT 1")
-        result = cur.fetchone()
-        speech_output = result[0]
-        reprompt_text = "I did not understand your command. " \
-        "You can say take a test, give me an advice or just talk."
-        should_end_session = False
-        return build_response(session_attributes, build_speechlet_response(
-                card_title, speech_output, reprompt_text, should_end_session))
-    
 
 #TODO FOR ASADA: change intents to be appropriate with our functions
 def on_intent(intent_request, session):
@@ -228,17 +205,15 @@ def on_intent(intent_request, session):
     #elif intent_name == "ContinueConvo":
     #    return ContinueConvoAction(intent, session)
     #elif intent_name == "RecommendMeMusic":
-    #    return MusicAction(intent, session);    
+    #    return MusicAction(intent, session);
     if intent_name == "AMAZON.HelpIntent":
         return help_asada()
     elif intent_name == "DeathAlert":
         return death_alert()
-    elif intent_name == "FortuneCookie":
-        return fortune_cookie()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
     #elif intent_name == "AMAZON.PauseIntent" or intent_name == "AMAZON.ResumeIntent"
-    #    return do_something(); 
+    #    return do_something();
     else:
         raise ValueError("Invalid intent")
 
@@ -260,7 +235,6 @@ def lambda_handler(event, context):
     """ Route the incoming request based on type (LaunchRequest, IntentRequest,
     etc.) The JSON body of the request is provided in the event parameter.
     """
-    
     print("event.session.application.applicationId=" +
           event['session']['application']['applicationId'])
 
@@ -276,10 +250,11 @@ def lambda_handler(event, context):
     if event['session']['new']:
         on_session_started({'requestId': event['request']['requestId']},
                            event['session'])
+
     if event['request']['type'] == "LaunchRequest":
         return on_launch(event['request'], event['session'])
     elif event['request']['type'] == "IntentRequest":
         return on_intent(event['request'], event['session'])
     elif event['request']['type'] == "SessionEndedRequest":
         return on_session_ended(event['request'], event['session'])
-    
+
