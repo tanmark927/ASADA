@@ -2,6 +2,7 @@ from __future__ import print_function
 import sys
 import logging
 import pymysql
+import datetime
 
 #rds settings
 rds_host  = "asada.cofr9vg9xjlm.us-east-1.rds.amazonaws.com"
@@ -21,7 +22,18 @@ except:
 
 logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
 
+
 # --------------- Helpers that build all of the responses ----------------------
+
+def write_to_conversation(userID, outgoing, message):
+    
+    with conn.cursor() as cursor:
+        now = datetime.datetime.now()
+        date = now.strftime("%Y-%m-%d")
+        print(message)
+        sql = "INSERT INTO Conversation (UserID, outgoing, dateSent, message) VALUES ({0}, {1}, '{2}', '{3}');".format(userID, outgoing, date, message)
+        cursor.execute(sql)
+    conn.commit()
 
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
     return {
@@ -167,6 +179,11 @@ def on_launch(launch_request, session):
     # Dispatch to your skill's launch
     return get_welcome_response()
 
+def start_survey(request):
+	global surveyScore
+	
+	surveyScore = 0
+	
 def help_asada():
     #help function for asada
     session_attributes = {}
@@ -175,21 +192,25 @@ def help_asada():
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
+    write_to_conversation(2222, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
     
 def death_alert():
+    #emergency suicide alert
     session_attributes = {}
     card_title = "911 emergency function"
     speech_output = "Please call 911 or the sucide hotline 1 800 273 8255"
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
+    write_to_conversation(2222, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
 #TODO: implement count, grab from the database. return a random choice from the size
 def fortune_cookie():
+    #test run to grab a fortune cookie
     session_attributes = {}
     card_title = "Fortune Cookie"
     result = ""
@@ -200,9 +221,9 @@ def fortune_cookie():
         reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
         should_end_session = False
+        write_to_conversation(2222, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
-    
     
 
 #TODO FOR ASADA: change intents to be appropriate with our functions
@@ -214,7 +235,7 @@ def on_intent(intent_request, session):
 
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
-
+    
     # Dispatch to your skill's intent handlers
     #if intent_name == "AdviceGiver":
     #    return AdviceGiverAction(intent, session)
@@ -222,8 +243,17 @@ def on_intent(intent_request, session):
     #    return ContinueConvoAction(intent, session)
     #elif intent_name == "RecommendMeMusic":
     #    return MusicAction(intent, session);    
+    
+    
+        #for key in event.key():
+    #    message = message + " " + key
+        
+    write_to_conversation(2222, 1, intent_name)
+    
     if intent_name == "AMAZON.HelpIntent":
         return help_asada()
+	elif intent name == "SurveyIntent":
+		return start_durvey(request)
     elif intent_name == "DeathAlert":
         return death_alert()
     elif intent_name == "FortuneCookie":
@@ -265,11 +295,15 @@ def lambda_handler(event, context):
     # if (event['session']['application']['applicationId'] !=
     #         "amzn1.echo-sdk-ams.app.[unique-value-here]"):
     #     raise ValueError("Invalid Application ID")
-
+    
+    message = event
+    #for key in event.key():
+    #    message = message + " " + key
+        
+    write_to_conversation(2222, 1, message)
     if event['session']['new']:
         on_session_started({'requestId': event['request']['requestId']},
                            event['session'])
-
     if event['request']['type'] == "LaunchRequest":
         return on_launch(event['request'], event['session'])
     elif event['request']['type'] == "IntentRequest":
