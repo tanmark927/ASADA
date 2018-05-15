@@ -294,14 +294,11 @@ def lambda_handler(event, context):
     #         "amzn1.echo-sdk-ams.app.[unique-value-here]"):
     #     raise ValueError("Invalid Application ID")
     
-<<<<<<< HEAD
     message = event
     #for key in event.key():
     #    message = message + " " + key
         
     write_to_conversation(2222, 1, message)
-=======
->>>>>>> 3a7496862adec058f42b7c24042910da9f89a123
     if event['session']['new']:
         on_session_started({'requestId': event['request']['requestId']},
                            event['session'])
