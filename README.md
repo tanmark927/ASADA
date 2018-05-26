@@ -19,9 +19,14 @@ can.
 
 
 Summer Upgrade Todo:
+  
   Aim for Conversation
+  
   Integrate ML if needed (and which Algorithm LSTM, CNN, DecisionTrees?)
+  
   Redesign DB and Clean
+  
   Android Integration to DB
+  
   and more.....
   
