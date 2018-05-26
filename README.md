@@ -28,6 +28,8 @@ Summer Upgrade Todo:
   Redesign DB and Clean
   
   Android Integration to DB
+
+  Survey functionality
   
   and more.....
   
