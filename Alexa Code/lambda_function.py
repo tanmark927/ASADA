@@ -3,6 +3,9 @@ import sys
 import logging
 import pymysql
 import datetime
+import math
+import string
+import random
 
 #rds settings
 rds_host  = "asada.cofr9vg9xjlm.us-east-1.rds.amazonaws.com"
@@ -10,6 +13,38 @@ name = "asadadepression"
 password = "Dontbesad1"
 db_name = "asadaDB"
 
+#-------variables for survey-------
+
+QUESTION_COUNT = 10
+
+OPENING_MESSAGE = "This is the Patient Health Questionnaire. " \
+                   "It will measure the severity and presence of depression. " \
+                   "The higher your score, the more severe your depression is. "
+
+SKILL_TITLE = "Patient Health Questionnaire"
+BEGIN_STATEMENT = "You will be asked 9 questions about problems you have faced in the past two weeks. "
+END_STATEMENT = "Thank you for completing the Patient Health Questionnaire. "
+
+USE_CARDS_FLAG = False
+
+STATE_START = "Start"
+STATE_QUIZ = "Questionnaire"
+
+STATE = STATE_START
+COUNTER = 0
+QUIZSCORE = 0
+
+SAYAS_INTERJECT = "<say-as interpret-as='interjection'>"
+SAYAS_SPELLOUT = "<say-as interpret-as='spell-out'>"
+SAYAS = "</say-as>"
+BREAKSTRONG = "<break strength='strong'/>"
+
+#-------class to contain -------
+#class has frequency, attach number to name
+#not at all - 0
+#several days - 1
+#more than half - 2
+#nearly every day - 3
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -179,9 +214,6 @@ def on_launch(launch_request, session):
     # Dispatch to your skill's launch
     return get_welcome_response()
 
-def start_survey(request):
-	
-	
 def help_asada():
     #help function for asada
     session_attributes = {}
@@ -224,6 +256,15 @@ def fortune_cookie():
                 card_title, speech_output, reprompt_text, should_end_session))
     
 
+def do_quiz():
+    session_attributes = {}
+    card_title = "Begin Survey"
+    speech_output = OPENING_MESSAGE
+    reprompt_text = "I did not understand your command. "
+    should_end_session = False
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
+
 #TODO FOR ASADA: change intents to be appropriate with our functions
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
@@ -250,14 +291,14 @@ def on_intent(intent_request, session):
     
     if intent_name == "AMAZON.HelpIntent":
         return help_asada()
-	elif intent name == "SurveyIntent":
-		return start_durvey(request)
     elif intent_name == "DeathAlert":
         return death_alert()
     elif intent_name == "FortuneCookie":
         return fortune_cookie()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
+    elif intent_name == "SurveyIntent":
+        return do_quiz()
     #elif intent_name == "AMAZON.PauseIntent" or intent_name == "AMAZON.ResumeIntent"
     #    return do_something(); 
     else:
@@ -294,11 +335,6 @@ def lambda_handler(event, context):
     #         "amzn1.echo-sdk-ams.app.[unique-value-here]"):
     #     raise ValueError("Invalid Application ID")
     
-    message = event
-    #for key in event.key():
-    #    message = message + " " + key
-        
-    write_to_conversation(2222, 1, message)
     if event['session']['new']:
         on_session_started({'requestId': event['request']['requestId']},
                            event['session'])
