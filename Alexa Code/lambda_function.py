@@ -177,7 +177,7 @@ def death_alert():
     #emergency suicide alert
     session_attributes = {}
     card_title = "911 emergency function"
-    speech_output = "Please call 911 or the sucide hotline 1 800 273 8255"
+    speech_output = "ASADA recommends you call 911 or the suicide hotline 1 800 273 8255"
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
@@ -185,23 +185,57 @@ def death_alert():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
-#TODO: implement count, grab from the database. return a random choice from the size
 def fortune_cookie():
     #test run to grab a fortune cookie
     session_attributes = {}
     card_title = "Fortune Cookie"
     result = ""
     with conn.cursor() as cur:
+        #change query later to tie more closely to survey
         cur.execute("select FC_Message from FortuneCookie ORDER BY RAND() LIMIT 1")
         result = cur.fetchone()
         speech_output = result[0]
         reprompt_text = "I did not understand your command. " \
-        "You can say take a test, give me an advice or just talk."
+        "You can ask ASADA to give a survey, give advice or just talk."
         should_end_session = False
         write_to_conversation(2222, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
     
+def sleep_habits():
+    #retrieve a piece of sleep advice for the user
+    session_attributes = {}
+    card_title = "Sleep Habits"
+    result = ""
+    with conn.cursor() as cur:
+        #change query later to tie more closely to survey
+        cur.execute("select advice from SleepAdvice ORDER BY RAND() LIMIT 1")
+        result = cur.fetchone()
+        speech_output = result[0]
+        reprompt_text = "I did not understand your command. " \
+        "You can ask ASADA to give a survey, give advice or just talk."
+        should_end_session = False
+        write_to_conversation(2222, 0, speech_output)
+        return build_response(session_attributes, build_speechlet_response(
+            card_title, speech_output, reprompt_text, should_end_session))
+    
+def eating_habits():
+    #retrieve a piece of eating advice for the user
+    session_attributes = {}
+    card_title = "Eating Habits"
+    result = ""
+    with conn.cursor() as cur:
+        #change query later to tie more closely to survey
+        cur.execute("select advice from EatingAdvice ORDER BY RAND() LIMIT 1")
+        result = cur.fetchone()
+        speech_output = result[0]
+        reprompt_text = "I did not understand your command. " \
+        "You can ask ASADA to give a survey, give advice or just talk."
+        should_end_session = False
+        write_to_conversation(2222, 0, speech_output)
+        return build_response(session_attributes, build_speechlet_response(
+            card_title, speech_output, reprompt_text, should_end_session))
+
 def ask_question(request, speech_output):
     #reset COUNTER
     if globals()['COUNTER'] <= 0:
@@ -212,7 +246,7 @@ def ask_question(request, speech_output):
     
     item_cls = PROBLEMS[COUNTER - 1]
     quiz_property = item_cls.get_prop() #TODO: Create method
-    reprompt_text = get_question(quiz_property, item_cls) #TODO: create method
+    #reprompt_text = get_question(quiz_property, item_cls) #TODO: create method
     speech_output += reprompt_text
     card_title = "Question" + str(COUNTER)
     session_attributes = {"quizscore":globals()['QUIZSCORE'],
@@ -223,8 +257,8 @@ def ask_question(request, speech_output):
                   "quizitem":item_cls.__dict__
                  }
     should_end_session = False
-        return build_response(session_attributes, build_speechlet_response(
-                card_title, speech_output, reprompt_text, should_end_session))    
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))    
 
 def do_quiz():
     session_attributes = {}
@@ -269,6 +303,10 @@ def on_intent(intent_request, session):
         return handle_session_end_request()
     elif intent_name == "SurveyIntent":
         return do_quiz()
+    elif intent_name == "SleepHabits":
+        return sleep_habits()
+    elif intent_name == "EatingHabits":
+        return eating_habits()
     #elif intent_name == "AMAZON.PauseIntent" or intent_name == "AMAZON.ResumeIntent"
     #    return do_something(); 
     else:
