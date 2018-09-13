@@ -3,12 +3,59 @@ import sys
 import logging
 import pymysql
 import datetime
+import math
+import string
+import random
 
 #rds settings
 rds_host  = "asada.cofr9vg9xjlm.us-east-1.rds.amazonaws.com"
 name = "asadadepression"
 password = "Dontbesad1"
 db_name = "asadaDB"
+
+#-------variables for survey-------
+
+#QUESTION_COUNT = 9
+
+OPENING_MESSAGE = "This is the Patient Health Questionnaire. " \
+                   "It will measure the severity and presence of depression. " \
+                   "The higher your score, the more severe your depression is. "
+
+SKILL_TITLE = "Patient Health Questionnaire"
+BEGIN_STATEMENT = "You will be asked 9 questions about problems you have faced in the past two weeks. "
+END_STATEMENT = "Thank you for completing the Patient Health Questionnaire. "
+
+USE_CARDS_FLAG = False
+
+STATE_START = "Start"
+STATE_QUIZ = "Questionnaire"
+
+STATE = STATE_START
+COUNTER = 0
+QUIZSCORE = 0
+
+SAYAS_INTERJECT = "<say-as interpret-as='interjection'>"
+SAYAS_SPELLOUT = "<say-as interpret-as='spell-out'>"
+SAYAS = "</say-as>"
+BREAKSTRONG = "<break strength='strong'/>"
+
+#-------class to contain -------
+#class has frequency, attach number to name
+#not at all - 0
+#several days - 1
+#more than half - 2
+#nearly every day - 3
+
+PROBLEMS = []
+PROBLEMS.append("Little interest or pleasure in doing things")
+PROBLEMS.append("Feeling down, depressed or hopeless")
+PROBLEMS.append("Trouble falling asleep, staying asleep, or sleeping too much")
+PROBLEMS.append("Feeling tired or having little energy")
+PROBLEMS.append("Poor appetite or overeating")
+PROBLEMS.append("Feeling bad about yourself")
+PROBLEMS.append("Trouble concentrating")
+PROBLEMS.append("Moving or speaking too slowly or quickly")
+PROBLEMS.append("Suicidal thoughts")
 
 
 logger = logging.getLogger()
@@ -64,6 +111,33 @@ def build_response(session_attributes, speechlet_response):
     }
 
 
+#------------------Question class---------------------------#
+class Question: 
+	count = 0
+	
+	def __init__(self, index, question, point):
+		self.index = index
+		self.question = question
+		self.point = point
+		Question.count += 1
+	
+	@staticmethod
+	def get_question():
+		return self.question
+	
+	@statmicethod
+	def get_point():
+		return self.point
+	def set_point(self, x):
+		self.point = x
+	def get_text_description(self):
+		text = "index: " + self.index + " out of " + Question.count + "\n"
+		text += "question: " + self.question + "\n"
+		text += "point: " + self.point + "\n"
+		
+ITEMS = []
+
+
 # --------------- Functions that control the skill's behavior ------------------
 
 #TODO FOR ASADA: change intents to be appropriate with our functions
@@ -86,7 +160,6 @@ def get_welcome_response():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
-
 def handle_session_end_request():
     card_title = "Session Ended"
     speech_output = "Thank you for using ASADA. " \
@@ -95,70 +168,6 @@ def handle_session_end_request():
     should_end_session = True
     return build_response({}, build_speechlet_response(
         card_title, speech_output, None, should_end_session))
-
-'''
-#TODO FOR ASADA: change intents to be appropriate with our functions
-def create_favorite_color_attributes(favorite_color):
-    return {"favoriteColor": favorite_color}
-
-#TODO FOR ASADA: change intents to be appropriate with our functions
-def AdviceGiverAction(intent, session):
-    
-    card_title = intent['name']
-    session_attributes = {}
-    should_end_session = False
-
-    #if 'Color' in intent['slots']:
-    #    favorite_color = intent['slots']['Color']['value']
-    #    session_attributes = create_favorite_color_attributes(favorite_color)
-    #    speech_output = "I now know your favorite color is " + \
-    #                    favorite_color + \
-    #                    ". You can ask me your favorite color by saying, " \
-    #                    "what's my favorite color?"
-    #    reprompt_text = "You can ask me your favorite color by saying, " \
-    #                    "what's my favorite color?"
-    #else:
-    #    speech_output = "I'm not sure what your favorite color is. " \
-    #                    "Please try again."
-    #    reprompt_text = "I'm not sure what your favorite color is. " \
-    #                    "You can tell me your favorite color by saying, " \
-    #                    "my favorite color is red."
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
-
-#TODO FOR ASADA: change intents to be appropriate with our functions, may actually delete this one
-def ContinueConvoAction(intent, session):
-    session_attributes = {}
-    reprompt_text = None
-
-    #if session.get('attributes', {}) and "favoriteColor" in session.get('attributes', {}):
-    #    favorite_color = session['attributes']['favoriteColor']
-    #    speech_output = "Your favorite color is " + favorite_color + \
-    #                    ". Goodbye."
-    #    should_end_session = True
-    #else:
-    #    speech_output = "I'm not sure what your favorite color is. " \
-    #                    "You can say, my favorite color is red."
-    #    should_end_session = False
-
-    # Setting reprompt_text to None signifies that we do not want to reprompt
-    # the user. If the user does not respond or says something that is not
-    # understood, the session will end.
-    return build_response(session_attributes, build_speechlet_response(
-        intent['name'], speech_output, reprompt_text, should_end_session))
-
-
-def MusicAction(intent, session):
-    # Setting reprompt_text to None signifies that we do not want to reprompt
-    # the user. If the user does not respond or says something that is not
-    # understood, the session will end.
-    return build_response(session_attributes, build_speechlet_response(
-        intent['name'], speech_output, reprompt_text, should_end_session))
-    
-#TODO: fill out logic for pause and resume intent
-def do_something():
-    return 0;
-'''
 
 # --------------- Events ------------------
 
@@ -179,11 +188,6 @@ def on_launch(launch_request, session):
     # Dispatch to your skill's launch
     return get_welcome_response()
 
-def start_survey(request):
-	global surveyScore
-	
-	surveyScore = 0
-	
 def help_asada():
     #help function for asada
     session_attributes = {}
@@ -226,6 +230,43 @@ def fortune_cookie():
                 card_title, speech_output, reprompt_text, should_end_session))
     
 
+def ask_question(request, speech_output):
+    #reset COUNTER
+    if globals()['COUNTER'] <= 0:
+        globals()['COUNTER'] = 0
+        speech_output = OPENING_MESSAGE
+    
+    globals()['COUNTER'] += 1
+    
+    item_cls = PROBLEMS[COUNTER - 1]
+    quiz_property = item_cls.get_prop() #TODO: Create method
+    reprompt_text = get_question(quiz_property, item_cls) #TODO: create method
+    speech_output += reprompt_text
+    card_title = "Question" + str(COUNTER)
+    session_attributes = {"quizscore":globals()['QUIZSCORE'],
+                  "quizproperty":quiz_property,
+                  "response":speech_output,
+                  "state": globals()['STATE'],
+                  "counter":globals()['COUNTER'],
+                  "quizitem":item_cls.__dict__
+                 }
+    should_end_session = False
+        return build_response(session_attributes, build_speechlet_response(
+                card_title, speech_output, reprompt_text, should_end_session))    
+
+def do_quiz(request):
+    session_attributes = {}
+	global surveyscore
+	global counter
+	global state
+    card_title = "Begin Survey"
+    speech_output = OPENING_MESSAGE
+    reprompt_text = "I did not understand your command. "
+    should_end_session = False
+	return ask_question(request, "")
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
+
 #TODO FOR ASADA: change intents to be appropriate with our functions
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
@@ -252,14 +293,14 @@ def on_intent(intent_request, session):
     
     if intent_name == "AMAZON.HelpIntent":
         return help_asada()
-	elif intent name == "SurveyIntent":
-		return start_durvey(request)
     elif intent_name == "DeathAlert":
         return death_alert()
     elif intent_name == "FortuneCookie":
         return fortune_cookie()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
+    elif intent_name == "SurveyIntent":
+        return do_quiz()
     #elif intent_name == "AMAZON.PauseIntent" or intent_name == "AMAZON.ResumeIntent"
     #    return do_something(); 
     else:
@@ -296,11 +337,6 @@ def lambda_handler(event, context):
     #         "amzn1.echo-sdk-ams.app.[unique-value-here]"):
     #     raise ValueError("Invalid Application ID")
     
-    message = event
-    #for key in event.key():
-    #    message = message + " " + key
-        
-    write_to_conversation(2222, 1, message)
     if event['session']['new']:
         on_session_started({'requestId': event['request']['requestId']},
                            event['session'])
