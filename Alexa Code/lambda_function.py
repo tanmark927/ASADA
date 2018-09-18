@@ -28,7 +28,7 @@ END_STATEMENT = "Thank you for completing the Patient Health Questionnaire. "
 USE_CARDS_FLAG = False
 
 STATE_START = "Start"
-STATE_QUIZ = "Questionnaire"
+STATE_SURVEY = "Questionnaire"
 
 STATE = STATE_START
 COUNTER = 0
@@ -45,17 +45,6 @@ BREAKSTRONG = "<break strength='strong'/>"
 #several days - 1
 #more than half - 2
 #nearly every day - 3
-
-PROBLEMS = []
-PROBLEMS.append("Little interest or pleasure in doing things")
-PROBLEMS.append("Feeling down, depressed or hopeless")
-PROBLEMS.append("Trouble falling asleep, staying asleep, or sleeping too much")
-PROBLEMS.append("Feeling tired or having little energy")
-PROBLEMS.append("Poor appetite or overeating")
-PROBLEMS.append("Feeling bad about yourself")
-PROBLEMS.append("Trouble concentrating")
-PROBLEMS.append("Moving or speaking too slowly or quickly")
-PROBLEMS.append("Suicidal thoughts")
 
 
 logger = logging.getLogger()
@@ -115,17 +104,15 @@ def build_response(session_attributes, speechlet_response):
 class Question: 
 	count = 0
 	
-	def __init__(self, index, question, point):
-		self.index = index
-		self.question = question
-		self.point = point
-		Question.count += 1
+	def __init__(self, question):
+        self.question = question
+        Question.count += 1
 	
 	@staticmethod
 	def get_question():
 		return self.question
 	
-	@statmicethod
+	@staticmethod
 	def get_point():
 		return self.point
 	def set_point(self, x):
@@ -136,7 +123,15 @@ class Question:
 		text += "point: " + self.point + "\n"
 		
 ITEMS = []
-
+ITEMS.append(Question("Over the past 2 weeks, how often are you bothered with feeling little interest or pleasure in doing things?"))
+ITEMS.append(Question("Over the past 2 weeks, how often are you bothered with feeling down, depresed or hopelessness?"))
+ITEMS.append(Question("Over the past 2 weeks, how often do you have trouble falling aslkeep, staying asleep, or sleeping too much?"))
+ITEMS.append(Question("Over the past 2 weeks, how often are you feeling tired or having little energy for activities?"))
+ITEMS.append(Question("Over the past 2 weeks, how often are you bothered with a poor appetite or overeating?"))
+ITEMS.append(Question("Over the past 2 weeks, how often are you having bad thoughts about yourself?"))
+ITEMS.append(Question("Over the past 2 weeks, how often have you had trouble concentrating on an activity?"))
+ITEMS.append(Question("Over the past 2 weeks, how often are you bothered with moving or spekaing slowly? Or the opposite, feeling fidgety or restless"))
+ITEMS.append(Question("Over the past 2 weeks, how often have you had thoughts that you are better off dead or thought of hurting yourself in some way?"))
 
 # --------------- Functions that control the skill's behavior ------------------
 
@@ -238,34 +233,56 @@ def ask_question(request, speech_output):
     
     globals()['COUNTER'] += 1
     
-    item_cls = PROBLEMS[COUNTER - 1]
-    quiz_property = item_cls.get_prop() #TODO: Create method
-    reprompt_text = get_question(quiz_property, item_cls) #TODO: create method
-    speech_output += reprompt_text
+    item_cls = ITEMS[COUNTER - 1]
+    quiz_question = item_cls.get_question() #TODO: Create method
+    speech_output += quiz_question
     card_title = "Question" + str(COUNTER)
     session_attributes = {"quizscore":globals()['QUIZSCORE'],
-                  "quizproperty":quiz_property,
+                  "quizproperty":quiz_question,
                   "response":speech_output,
                   "state": globals()['STATE'],
                   "counter":globals()['COUNTER'],
                   "quizitem":item_cls.__dict__
                  }
-    should_end_session = False
+    should_end_session = True
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))    
 
 def do_quiz(request):
     session_attributes = {}
 	global surveyscore
-	global counter
+	global COUNTER
 	global state
+    state = STATE_SURVEY
     card_title = "Begin Survey"
     speech_output = OPENING_MESSAGE
     reprompt_text = "I did not understand your command. "
-    should_end_session = False
+    should_end_session = True
 	return ask_question(request, "")
+   # return build_response(session_attributes, build_speechlet_response(
+    #    card_title, speech_output, reprompt_text, should_end_session))
+
+def answer(request, intent, session):
+    global STATE
+    
+    if STATE == STATE_SURVEY:
+        return answer_quiz(request, intent, session)
+    speech_output = "You are not in the Depression screening process at the moment. You can say take the survey or start the survey"
+    card_title = "Gave survey answers while not in survey process"
+    should_end_session = True
+    reprompt_text = "I did not understand your command. "
     return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
+                card_title, speech_output, reprompt_text, should_end_session))
+    
+def answer_quiz(request, intent, session):
+    global QUIZSCORE
+    global COUNTER
+    global STATE
+    
+    speech_output = ""
+    quiz_question = ""
+    
+    
 
 #TODO FOR ASADA: change intents to be appropriate with our functions
 def on_intent(intent_request, session):
@@ -276,6 +293,8 @@ def on_intent(intent_request, session):
 
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
+    get_state(session)
+    
     
     # Dispatch to your skill's intent handlers
     #if intent_name == "AdviceGiver":
@@ -300,7 +319,9 @@ def on_intent(intent_request, session):
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
     elif intent_name == "SurveyIntent":
-        return do_quiz()
+        return do_quiz(request)
+    elif intent_name == "AnswerIntent":
+        return answer(request, intent, session)
     #elif intent_name == "AMAZON.PauseIntent" or intent_name == "AMAZON.ResumeIntent"
     #    return do_something(); 
     else:
