@@ -201,6 +201,23 @@ def fortune_cookie():
         write_to_conversation(2222, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
+
+def exercise_habits():
+    #test run to grab a fortune cookie
+    session_attributes = {}
+    card_title = "Exercise Habits"
+    result = ""
+    with conn.cursor() as cur:
+        #change query later to tie more closely to survey
+        cur.execute("select FA_Descriptions from FortuneCookie ORDER BY RAND() LIMIT 1")
+        result = cur.fetchone()
+        speech_output = result[0]
+        reprompt_text = "I did not understand your command. " \
+        "You can ask ASADA to give a survey, give advice or just talk."
+        should_end_session = False
+        write_to_conversation(2222, 0, speech_output)
+        return build_response(session_attributes, build_speechlet_response(
+                card_title, speech_output, reprompt_text, should_end_session))
     
 def sleep_habits():
     #retrieve a piece of sleep advice for the user
@@ -299,6 +316,8 @@ def on_intent(intent_request, session):
         return death_alert()
     elif intent_name == "FortuneCookie":
         return fortune_cookie()
+    elif intent_name == "ExerciseHabits":
+        return exercise_habits()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
     elif intent_name == "SurveyIntent":
