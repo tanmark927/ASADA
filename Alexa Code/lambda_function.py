@@ -208,8 +208,14 @@ def exercise_habits():
     card_title = "Exercise Habits"
     result = ""
     with conn.cursor() as cur:
-        #change query later to tie more closely to survey
-        cur.execute("select FA_Descriptions from FortuneCookie ORDER BY RAND() LIMIT 1")
+        #cur.execute("select * from Conversation order by conversationID desc limit 1;)
+        #result = cur.fetchone()
+        # if result contains arms exercise type, execute a random arms description query
+        # if result contains legs exercise type, execute a random legs description query
+        #if no type is specified, execute below code
+        
+        #execute this query if user command does not specify area of exercise
+        cur.execute("select FA_Description from FitnessActivity ORDER BY RAND() LIMIT 1")
         result = cur.fetchone()
         speech_output = result[0]
         reprompt_text = "I did not understand your command. " \
