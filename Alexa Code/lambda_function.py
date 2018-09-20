@@ -208,15 +208,31 @@ def exercise_habits():
     card_title = "Exercise Habits"
     result = ""
     with conn.cursor() as cur:
-        #cur.execute("select * from Conversation order by conversationID desc limit 1;)
-        #result = cur.fetchone()
-        # if result contains arms exercise type, execute a random arms description query
-        # if result contains legs exercise type, execute a random legs description query
-        #if no type is specified, execute below code
+        cur.execute("select * from Conversation order by conversationID desc limit 1;)
+        first_result = cur.fetchone()
         
-        #execute this query if user command does not specify area of exercise
-        cur.execute("select FA_Description from FitnessActivity ORDER BY RAND() LIMIT 1")
-        result = cur.fetchone()
+        #TODO: further narrow query using FA_Intensity and make sure it is equal to user level
+        if 'arms' in first_result:
+            #execute a random arms description query
+            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'arms' ORDER BY RAND() LIMIT 1")
+            result = cur.fetchone()
+        elif 'legs' in first_result:
+            #execute a random arms description query
+            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'legs' ORDER BY RAND() LIMIT 1")
+            result = cur.fetchone()
+        elif 'chest' in first_result:
+            #execute a random chest description query
+            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'chest' ORDER BY RAND() LIMIT 1")
+            result = cur.fetchone()
+        elif 'back' in first_result:
+            #execute a random back description query
+            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'back' ORDER BY RAND() LIMIT 1")
+            result = cur.fetchone()
+        else
+            #execute this query if user command does not specify area of exercise
+            cur.execute("select FA_Description from FitnessActivity ORDER BY RAND() LIMIT 1")
+            result = cur.fetchone()
+            
         speech_output = result[0]
         reprompt_text = "I did not understand your command. " \
         "You can ask ASADA to give a survey, give advice or just talk."
