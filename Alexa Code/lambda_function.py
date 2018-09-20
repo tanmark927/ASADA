@@ -110,7 +110,7 @@ class Question:
 	
 	@staticmethod
 	def get_question():
-		return self.question
+		return str(self.question)
 	
 	@staticmethod
 	def get_point():
@@ -279,19 +279,46 @@ def answer_quiz(request, intent, session):
     global COUNTER
     global STATE
     
-    speech_output = ""
+    speech_message = ""
     quiz_question = ""
     
     #check if first question, and put welcome message?
     
-    if session['attributes'] and 'quizproperty' in session['attributes']:
-        
     if session['attributes'] and session['attributes']['quizscore'] != None:
         QUIZSCORE = session['attributes']['quizscore']
     if 'Answer' in intent['slots']:
         QUIZSCORE += intent['slots']['Answer']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['id']
         
+    if COUNTER < ITEMS.count:
+        return ask_question(request, "")
+    speech_message += get_finalscore(QUIZSCORE)
+    speech_message += get_result(QUIZSCORE)
     
+    STATE = STATE_START
+    COUNTER = 0
+    QUIZSCORE = 0
+    
+    session_attributes = {"quizscore":globals()['QUIZSCORE'],
+                  "quizproperty":quiz_question,
+                  "response":speech_message,
+                  "state": globals()['STATE'],
+                  "counter":globals()['COUNTER']
+                 }
+    
+def get_finalscore(score):
+    return "your final score is "+str(score)+". "
+    
+def get_result(score):
+    if(score >= 0 and score <= 4):
+        return "based on your screening, the score of " +str(score)+ " suggests minimal or no depression, which may not need treatment. It is recommended to take the survey every two weeks as a follow-up."
+    if(score >= 5 and score <= 9):
+        return "based on your screening, the score of " +str(score)+ " suggests mild depression, which may require watchful waiting and repeated survey follow-ups. It is recommended to take the survey every two weeks."
+    if(score >= 10 and score <= 14):
+        return "based on your screening, the score of " +str(score)+ "suggests moderate depression severity. You may consider to see a therapist to prepare a treatment plan ranging from counseling, follow-up and possibly pharmacotherapy."
+    if(score >= 15 and score <= 20):
+        return "based on your screening, the score of " +str(score)+ "suggests moderately severe depression. You should see a therapist immediately to start pharmacotherapy and possibly psychotherapy. 
+    if(score > 20):
+        return "based on your screening, the score of " +str(score)+ "suggests severe depression. You should seek immediate help. Refer to a mental health specialist so you may begin treatment."
     
     
 #-------------------lambda function-----------------------#
