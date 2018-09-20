@@ -113,10 +113,6 @@ class Question:
 		return str(self.question)
 	
 	@staticmethod
-	def get_point():
-		return self.point
-	def set_point(self, x):
-		self.point = x
 	def get_text_description(self):
 		text = "index: " + self.index + " out of " + Question.count + "\n"
 		text += "question: " + self.question + "\n"
@@ -250,10 +246,10 @@ def ask_question(request, speech_output):
 
 def do_quiz(request):
     session_attributes = {}
-	global surveyscore
+	global QUIZSCORE
 	global COUNTER
-	global state
-    state = STATE_SURVEY
+	global STATE
+    STATE = STATE_SURVEY
     card_title = "Begin Survey"
     speech_output = OPENING_MESSAGE
     reprompt_text = "I did not understand your command. "
@@ -294,6 +290,14 @@ def answer_quiz(request, intent, session):
     speech_message += get_finalscore(QUIZSCORE)
     speech_message += get_result(QUIZSCORE)
     
+    with conn.cursor() as cursor:
+        now = datetime.datetime.now()
+        date = now.strftime("%Y-%m-%d")
+        print(message)
+        sql = "INSERT INTO Survey (SurveyID, SurveyDate, SurveyScore) VALUES ({0}, {1}, '{2}', '{3}');".format(2222, date, QUIZSCORE)
+        cursor.execute(sql)
+    conn.commit()
+    
     STATE = STATE_START
     COUNTER = 0
     QUIZSCORE = 0
@@ -304,6 +308,11 @@ def answer_quiz(request, intent, session):
                   "state": globals()['STATE'],
                   "counter":globals()['COUNTER']
                  }
+    reprompt_text = ""
+    should_end_session = False
+    card_title = "Survey"
+    return build_response(session_attributes, build_speechlet_response(
+                card_title, speech_message, reprompt_text, should_end_session))
     
 def get_finalscore(score):
     return "your final score is "+str(score)+". "
