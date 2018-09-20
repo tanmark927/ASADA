@@ -224,7 +224,7 @@ def fortune_cookie():
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
     
-
+#-----------------------Quiz function---------------#
 def ask_question(request, speech_output):
     #reset COUNTER
     if globals()['COUNTER'] <= 0:
@@ -244,7 +244,7 @@ def ask_question(request, speech_output):
                   "counter":globals()['COUNTER'],
                   "quizitem":item_cls.__dict__
                  }
-    should_end_session = True
+    should_end_session = False
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))    
 
@@ -257,7 +257,7 @@ def do_quiz(request):
     card_title = "Begin Survey"
     speech_output = OPENING_MESSAGE
     reprompt_text = "I did not understand your command. "
-    should_end_session = True
+    should_end_session = False
 	return ask_question(request, "")
    # return build_response(session_attributes, build_speechlet_response(
     #    card_title, speech_output, reprompt_text, should_end_session))
@@ -269,7 +269,7 @@ def answer(request, intent, session):
         return answer_quiz(request, intent, session)
     speech_output = "You are not in the Depression screening process at the moment. You can say take the survey or start the survey"
     card_title = "Gave survey answers while not in survey process"
-    should_end_session = True
+    should_end_session = False
     reprompt_text = "I did not understand your command. "
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
@@ -282,8 +282,19 @@ def answer_quiz(request, intent, session):
     speech_output = ""
     quiz_question = ""
     
+    #check if first question, and put welcome message?
     
-
+    if session['attributes'] and 'quizproperty' in session['attributes']:
+        
+    if session['attributes'] and session['attributes']['quizscore'] != None:
+        QUIZSCORE = session['attributes']['quizscore']
+    if 'Answer' in intent['slots']:
+        QUIZSCORE += intent['slots']['Answer']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['id']
+        
+    
+    
+    
+#-------------------lambda function-----------------------#
 #TODO FOR ASADA: change intents to be appropriate with our functions
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
