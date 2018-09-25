@@ -154,6 +154,19 @@ def on_launch(launch_request, session):
     # Dispatch to your skill's launch
     return get_welcome_response()
 
+
+def calculate_well_being(score):
+    if score >= 0 && score <= 4:
+        return 5;
+    elif score >= 5 && score <= 9:
+        return 4;
+    elif score >= 10 && score <= 14:
+        return 3;
+    elif score >= 15 && score <= 20:
+        return 2;
+    elif score > 20:
+        return 1;
+
 def help_asada():
     #help function for asada
     session_attributes = {}
@@ -196,29 +209,30 @@ def fortune_cookie():
                 card_title, speech_output, reprompt_text, should_end_session))
 
 def exercise_habits():
-    #test run to grab a fortune cookie
+    #test run to get exercise advice
     session_attributes = {}
     card_title = "Exercise Habits"
     result = ""
+    exercise_intensity = 0
     with conn.cursor() as cur:
         cur.execute("select * from Conversation order by conversationID desc limit 1;")
         first_result = cur.fetchone()
-        
-        #TODO: further narrow query using FA_Intensity and make sure it is equal to user level
+        well_being = calculate_well_being(QUIZSCORE)
+
         if 'arms' in first_result:
-            #execute a random arms description query
+            # cur.execute("select FA_Description from FitnessActivity where FA_Category = 'arms' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
             cur.execute("select FA_Description from FitnessActivity where FA_Category = 'arms' ORDER BY RAND() LIMIT 1")
             result = cur.fetchone()
         elif 'legs' in first_result:
-            #execute a random arms description query
+            # cur.execute("select FA_Description from FitnessActivity where FA_Category = 'legs' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
             cur.execute("select FA_Description from FitnessActivity where FA_Category = 'legs' ORDER BY RAND() LIMIT 1")
             result = cur.fetchone()
         elif 'chest' in first_result:
-            #execute a random chest description query
+            # cur.execute("select FA_Description from FitnessActivity where FA_Category = 'chest' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
             cur.execute("select FA_Description from FitnessActivity where FA_Category = 'chest' ORDER BY RAND() LIMIT 1")
             result = cur.fetchone()
         elif 'back' in first_result:
-            #execute a random back description query
+            # cur.execute("select FA_Description from FitnessActivity where FA_Category = 'back' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
             cur.execute("select FA_Description from FitnessActivity where FA_Category = 'back' ORDER BY RAND() LIMIT 1")
             result = cur.fetchone()
         else:
@@ -233,14 +247,30 @@ def exercise_habits():
         write_to_conversation(2222, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
-    
+
+def severity_calculator(well_being_score):
+    if well_being_score == 5:
+        return 1
+    elif well_being_score == 4:
+        return 2
+    elif well_being_score == 3:
+        return 3
+    elif well_being_score == 2:
+        return 4
+    elif well_being_score == 1:
+        return 5
+
 def sleep_habits():
     #retrieve a piece of sleep advice for the user
     session_attributes = {}
     card_title = "Sleep Habits"
     result = ""
     with conn.cursor() as cur:
-        #change query later to tie more closely to survey
+        well_being = calculate_well_being(QUIZSCORE)
+        severity = severity_calculator(well_being)
+
+        #cur.execute("select advice from SleepAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
+        #comment or erase below query if above query is present
         cur.execute("select advice from SleepAdvice ORDER BY RAND() LIMIT 1")
         result = cur.fetchone()
         speech_output = result[0]
@@ -257,7 +287,11 @@ def eating_habits():
     card_title = "Eating Habits"
     result = ""
     with conn.cursor() as cur:
-        #change query later to tie more closely to survey
+        well_being = calculate_well_being(QUIZSCORE)
+        severity = severity_calculator(well_being)
+        
+        #cur.execute("select advice from EatingAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
+        #comment or erase below query if above query is present        
         cur.execute("select advice from EatingAdvice ORDER BY RAND() LIMIT 1")
         result = cur.fetchone()
         speech_output = result[0]
@@ -269,14 +303,15 @@ def eating_habits():
             card_title, speech_output, reprompt_text, should_end_session))
 #-----------------------Quiz function---------------#
 def ask_question(request, speech_output):
-    
+    global QUIZSCORE
+    global COUNTER
+    global STATE
     #reset COUNTER
     if globals()['COUNTER'] <= 0:
         globals()['COUNTER'] = 0
         speech_output += OPENING_MESSAGE
     
     globals()['COUNTER'] += 1
-    
 
     quiz_question = str(ITEMS[COUNTER - 1]) #TODO: Create method
     speech_output += quiz_question
@@ -287,6 +322,7 @@ def ask_question(request, speech_output):
                   "state": globals()['STATE'],
                   "counter":globals()['COUNTER'],
                  }
+  
     reprompt_text = "I did not understand your command. " \
         "You can ask ASADA to give a survey, give advice or just talk."
     should_end_session = False
@@ -329,19 +365,12 @@ def answer_quiz(request, intent, session):
     if session['attributes'] and session['attributes']['quizscore'] != None:
         QUIZSCORE = session['attributes']['quizscore']
     if 'Answer' in intent['slots']:
-        QUIZSCORE += intent['slots']['Answer']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['id']
+        QUIZSCORE += int(intent['slots']['Answer']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['id'])
         
-    if COUNTER < LEN(ITEMS):
+    if COUNTER < len(ITEMS):
         return ask_question(request, "")
     speech_message += get_finalscore(QUIZSCORE)
     speech_message += get_result(QUIZSCORE)
-    
-    with conn.cursor() as cursor:
-        now = datetime.datetime.now()
-        date = now.strftime("%Y-%m-%d")
-        sql = "INSERT INTO Survey (SurveyID, SurveyDate, SurveyScore) VALUES ({0}, {1}, '{2}', '{3}');".format(2222, date, QUIZSCORE)
-        cursor.execute(sql)
-    conn.commit()
     
     STATE = STATE_START
     COUNTER = 0
