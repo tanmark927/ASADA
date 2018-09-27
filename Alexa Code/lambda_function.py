@@ -393,17 +393,16 @@ def get_finalscore(score):
     
 def get_result(score):
     if(score >= 0 and score <= 4):
-        return "based on your screening, the score of " +str(score)+ " suggests minimal or no depression, which may not need treatment. It is recommended to take the survey every two weeks as a follow-up."
+        return "based on your screening, you score a 5 out of 5 on the well being scale."
     elif(score >= 5 and score <= 9):
-        return "based on your screening, the score of " +str(score)+ " suggests mild depression, which may require watchful waiting and repeated survey follow-ups. It is recommended to take the survey every two weeks."
+        return "based on your screening, you score a 4 out of 5 on the well being scale."
     elif(score >= 10 and score <= 14):
-        return "based on your screening, the score of " +str(score)+ " suggests moderate depression severity. You may consider to see a therapist to prepare a treatment plan ranging from counseling, follow-up and possibly pharmacotherapy."
+        return "based on your screening, you score a 3 out of 5 on the well being scale."
     elif(score >= 15 and score <= 20):
-        return "based on your screening, the score of " +str(score)+ " suggests moderately severe depression. You should see a therapist immediately to start pharmacotherapy and possibly psychotherapy. "
+        return "based on your screening, you score a 2 out of 5 on the well being scale."
     elif(score > 20):
-        return "based on your screening, the score of " +str(score)+ " suggests severe depression. You should seek immediate help. Refer to a mental health specialist so you may begin treatment."
-    
-#TODO FOR ASADA: change intents to be appropriate with our functions
+        return "based on your screening, you score a 1 out of 5 on the well being scale."
+        
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
 
@@ -412,15 +411,6 @@ def on_intent(intent_request, session):
 
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
-    
-    # Dispatch to your skill's intent handlers
-    #if intent_name == "AdviceGiver":
-    #    return AdviceGiverAction(intent, session)
-    #elif intent_name == "ContinueConvo":
-    #    return ContinueConvoAction(intent, session)
-    #elif intent_name == "RecommendMeMusic":
-    #    return MusicAction(intent, session);    
-    
     
         #for key in event.key():
     #    message = message + " " + key
