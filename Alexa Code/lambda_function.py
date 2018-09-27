@@ -156,13 +156,13 @@ def on_launch(launch_request, session):
 
 
 def calculate_well_being(score):
-    if score >= 0 && score <= 4:
+    if (score >= 0 and score <= 4):
         return 5;
-    elif score >= 5 && score <= 9:
+    elif (score >= 5 and score <= 9):
         return 4;
-    elif score >= 10 && score <= 14:
+    elif (score >= 10 and score <= 14):
         return 3;
-    elif score >= 15 && score <= 20:
+    elif (score >= 15 and score <= 20):
         return 2;
     elif score > 20:
         return 1;
