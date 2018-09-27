@@ -15,8 +15,6 @@ db_name = "asadaDB"
 
 #-------variables for survey-------
 
-#QUESTION_COUNT = 9
-
 OPENING_MESSAGE = "This is the Patient Health Questionnaire. " \
                    "It will measure the severity and presence of depression. " \
                    "The higher your score, the more severe your depression is. "
@@ -39,12 +37,6 @@ SAYAS_SPELLOUT = "<say-as interpret-as='spell-out'>"
 SAYAS = "</say-as>"
 BREAKSTRONG = "<break strength='strong'/>"
 
-#-------class to contain -------
-#class has frequency, attach number to name
-#not at all - 0
-#several days - 1
-#more than half - 2
-#nearly every day - 3
 
 
 logger = logging.getLogger()
@@ -100,34 +92,17 @@ def build_response(session_attributes, speechlet_response):
     }
 
 
-#------------------Question class---------------------------#
-class Question: 
-	count = 0
-	
-	def __init__(self, question):
-        self.question = question
-        Question.count += 1
-	
-	@staticmethod
-	def get_question():
-		return str(self.question)
-	
-	@staticmethod
-	def get_text_description(self):
-		text = "index: " + self.index + " out of " + Question.count + "\n"
-		text += "question: " + self.question + "\n"
-		text += "point: " + self.point + "\n"
-		
 ITEMS = []
-ITEMS.append(Question("Over the past 2 weeks, how often are you bothered with feeling little interest or pleasure in doing things?"))
-ITEMS.append(Question("Over the past 2 weeks, how often are you bothered with feeling down, depresed or hopelessness?"))
-ITEMS.append(Question("Over the past 2 weeks, how often do you have trouble falling aslkeep, staying asleep, or sleeping too much?"))
-ITEMS.append(Question("Over the past 2 weeks, how often are you feeling tired or having little energy for activities?"))
-ITEMS.append(Question("Over the past 2 weeks, how often are you bothered with a poor appetite or overeating?"))
-ITEMS.append(Question("Over the past 2 weeks, how often are you having bad thoughts about yourself?"))
-ITEMS.append(Question("Over the past 2 weeks, how often have you had trouble concentrating on an activity?"))
-ITEMS.append(Question("Over the past 2 weeks, how often are you bothered with moving or spekaing slowly? Or the opposite, feeling fidgety or restless"))
-ITEMS.append(Question("Over the past 2 weeks, how often have you had thoughts that you are better off dead or thought of hurting yourself in some way?"))
+ITEMS.append("Over the past 2 weeks, how often are you bothered with feeling little interest or pleasure in doing things?")
+ITEMS.append("Over the past 2 weeks, how often are you bothered with feeling down, depresed or hopelessness?")
+ITEMS.append("Over the past 2 weeks, how often do you have trouble falling aslkeep, staying asleep, or sleeping too much?")
+ITEMS.append("Over the past 2 weeks, how often are you feeling tired or having little energy for activities?")
+ITEMS.append("Over the past 2 weeks, how often are you bothered with a poor appetite or overeating?")
+ITEMS.append("Over the past 2 weeks, how often are you having bad thoughts about yourself?")
+ITEMS.append("Over the past 2 weeks, how often have you had trouble concentrating on an activity?")
+ITEMS.append("Over the past 2 weeks, how often are you bothered with moving or spekaing slowly? Or the opposite, feeling fidgety or restless")
+ITEMS.append("Over the past 2 weeks, how often have you had thoughts that you are better off dead or thought of hurting yourself in some way?")
+
 
 # --------------- Functions that control the skill's behavior ------------------
 
@@ -179,6 +154,19 @@ def on_launch(launch_request, session):
     # Dispatch to your skill's launch
     return get_welcome_response()
 
+
+def calculate_well_being(score):
+    if (score >= 0 and score <= 4):
+        return 5;
+    elif (score >= 5 and score <= 9):
+        return 4;
+    elif (score >= 10 and score <= 14):
+        return 3;
+    elif (score >= 15 and score <= 20):
+        return 2;
+    elif score > 20:
+        return 1;
+
 def help_asada():
     #help function for asada
     session_attributes = {}
@@ -195,7 +183,7 @@ def death_alert():
     #emergency suicide alert
     session_attributes = {}
     card_title = "911 emergency function"
-    speech_output = "Please call 911 or the sucide hotline 1 800 273 8255"
+    speech_output = "ASADA recommends you call 911 or the suicide hotline 1 800 273 8255"
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
@@ -203,34 +191,129 @@ def death_alert():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
-#TODO: implement count, grab from the database. return a random choice from the size
 def fortune_cookie():
     #test run to grab a fortune cookie
     session_attributes = {}
     card_title = "Fortune Cookie"
     result = ""
     with conn.cursor() as cur:
+        #change query later to tie more closely to survey
         cur.execute("select FC_Message from FortuneCookie ORDER BY RAND() LIMIT 1")
         result = cur.fetchone()
         speech_output = result[0]
         reprompt_text = "I did not understand your command. " \
-        "You can say take a test, give me an advice or just talk."
+        "You can ask ASADA to give a survey, give advice or just talk."
         should_end_session = False
         write_to_conversation(2222, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
+
+def exercise_habits():
+    #test run to get exercise advice
+    session_attributes = {}
+    card_title = "Exercise Habits"
+    result = ""
+    exercise_intensity = 0
+    with conn.cursor() as cur:
+        cur.execute("select * from Conversation order by conversationID desc limit 1;")
+        first_result = cur.fetchone()
+        well_being = calculate_well_being(QUIZSCORE)
+
+        if 'arms' in first_result:
+            # cur.execute("select FA_Description from FitnessActivity where FA_Category = 'arms' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
+            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'arms' ORDER BY RAND() LIMIT 1")
+            result = cur.fetchone()
+        elif 'legs' in first_result:
+            # cur.execute("select FA_Description from FitnessActivity where FA_Category = 'legs' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
+            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'legs' ORDER BY RAND() LIMIT 1")
+            result = cur.fetchone()
+        elif 'chest' in first_result:
+            # cur.execute("select FA_Description from FitnessActivity where FA_Category = 'chest' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
+            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'chest' ORDER BY RAND() LIMIT 1")
+            result = cur.fetchone()
+        elif 'back' in first_result:
+            # cur.execute("select FA_Description from FitnessActivity where FA_Category = 'back' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
+            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'back' ORDER BY RAND() LIMIT 1")
+            result = cur.fetchone()
+        else:
+            #execute this query if user command does not specify area of exercise
+            cur.execute("select FA_Description from FitnessActivity ORDER BY RAND() LIMIT 1")
+            result = cur.fetchone()
+            
+        speech_output = result[0]
+        reprompt_text = "I did not understand your command. " \
+        "You can ask ASADA to give a survey, give advice or just talk."
+        should_end_session = False
+        write_to_conversation(2222, 0, speech_output)
+        return build_response(session_attributes, build_speechlet_response(
+                card_title, speech_output, reprompt_text, should_end_session))
+
+def severity_calculator(well_being_score):
+    if well_being_score == 5:
+        return 1
+    elif well_being_score == 4:
+        return 2
+    elif well_being_score == 3:
+        return 3
+    elif well_being_score == 2:
+        return 4
+    elif well_being_score == 1:
+        return 5
+
+def sleep_habits():
+    #retrieve a piece of sleep advice for the user
+    session_attributes = {}
+    card_title = "Sleep Habits"
+    result = ""
+    with conn.cursor() as cur:
+        well_being = calculate_well_being(QUIZSCORE)
+        severity = severity_calculator(well_being)
+
+        #cur.execute("select advice from SleepAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
+        #comment or erase below query if above query is present
+        cur.execute("select advice from SleepAdvice ORDER BY RAND() LIMIT 1")
+        result = cur.fetchone()
+        speech_output = result[0]
+        reprompt_text = "I did not understand your command. " \
+        "You can ask ASADA to give a survey, give advice or just talk."
+        should_end_session = False
+        write_to_conversation(2222, 0, speech_output)
+        return build_response(session_attributes, build_speechlet_response(
+            card_title, speech_output, reprompt_text, should_end_session))
     
+def eating_habits():
+    #retrieve a piece of eating advice for the user
+    session_attributes = {}
+    card_title = "Eating Habits"
+    result = ""
+    with conn.cursor() as cur:
+        well_being = calculate_well_being(QUIZSCORE)
+        severity = severity_calculator(well_being)
+        
+        #cur.execute("select advice from EatingAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
+        #comment or erase below query if above query is present        
+        cur.execute("select advice from EatingAdvice ORDER BY RAND() LIMIT 1")
+        result = cur.fetchone()
+        speech_output = result[0]
+        reprompt_text = "I did not understand your command. " \
+        "You can ask ASADA to give a survey, give advice or just talk."
+        should_end_session = False
+        write_to_conversation(2222, 0, speech_output)
+        return build_response(session_attributes, build_speechlet_response(
+            card_title, speech_output, reprompt_text, should_end_session))
 #-----------------------Quiz function---------------#
 def ask_question(request, speech_output):
+    global QUIZSCORE
+    global COUNTER
+    global STATE
     #reset COUNTER
     if globals()['COUNTER'] <= 0:
         globals()['COUNTER'] = 0
-        speech_output = OPENING_MESSAGE
+        speech_output += OPENING_MESSAGE
     
     globals()['COUNTER'] += 1
-    
-    item_cls = ITEMS[COUNTER - 1]
-    quiz_question = item_cls.get_question() #TODO: Create method
+
+    quiz_question = str(ITEMS[COUNTER - 1]) #TODO: Create method
     speech_output += quiz_question
     card_title = "Question" + str(COUNTER)
     session_attributes = {"quizscore":globals()['QUIZSCORE'],
@@ -238,31 +321,32 @@ def ask_question(request, speech_output):
                   "response":speech_output,
                   "state": globals()['STATE'],
                   "counter":globals()['COUNTER'],
-                  "quizitem":item_cls.__dict__
                  }
+  
+    reprompt_text = "I did not understand your command. " \
+        "You can ask ASADA to give a survey, give advice or just talk."
     should_end_session = False
-        return build_response(session_attributes, build_speechlet_response(
+    return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))    
 
 def do_quiz(request):
-    session_attributes = {}
-	global QUIZSCORE
-	global COUNTER
-	global STATE
+    global QUIZSCORE
+    global COUNTER
+    global STATE
+    
+    
+    
+    COUNTER = 0
+    QUIZSCORE = 0
     STATE = STATE_SURVEY
-    card_title = "Begin Survey"
-    speech_output = OPENING_MESSAGE
-    reprompt_text = "I did not understand your command. "
-    should_end_session = False
-	return ask_question(request, "")
-   # return build_response(session_attributes, build_speechlet_response(
-    #    card_title, speech_output, reprompt_text, should_end_session))
+    return ask_question(request, "")
 
 def answer(request, intent, session):
     global STATE
     
     if STATE == STATE_SURVEY:
         return answer_quiz(request, intent, session)
+    session_attributes = {}
     speech_output = "You are not in the Depression screening process at the moment. You can say take the survey or start the survey"
     card_title = "Gave survey answers while not in survey process"
     should_end_session = False
@@ -283,20 +367,19 @@ def answer_quiz(request, intent, session):
     if session['attributes'] and session['attributes']['quizscore'] != None:
         QUIZSCORE = session['attributes']['quizscore']
     if 'Answer' in intent['slots']:
-        QUIZSCORE += intent['slots']['Answer']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['id']
+        QUIZSCORE += int(intent['slots']['Answer']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['id'])
         
-    if COUNTER < ITEMS.count:
+    if COUNTER < len(ITEMS):
         return ask_question(request, "")
     speech_message += get_finalscore(QUIZSCORE)
     speech_message += get_result(QUIZSCORE)
     
-    with conn.cursor() as cursor:
-        now = datetime.datetime.now()
-        date = now.strftime("%Y-%m-%d")
-        print(message)
-        sql = "INSERT INTO Survey (SurveyID, SurveyDate, SurveyScore) VALUES ({0}, {1}, '{2}', '{3}');".format(2222, date, QUIZSCORE)
-        cursor.execute(sql)
-    conn.commit()
+#     with conn.cursor() as cursor:
+#        now = datetime.datetime.now()
+#        date = now.strftime("%Y-%m-%d")
+#        sql = "INSERT INTO Survey (SurveyID, SurveyDate, SurveyScore) VALUES ({0}, {1}, '{2}');".format(2222, date, QUIZSCORE)
+#        cursor.execute(sql)
+#    conn.commit()
     
     STATE = STATE_START
     COUNTER = 0
@@ -319,19 +402,16 @@ def get_finalscore(score):
     
 def get_result(score):
     if(score >= 0 and score <= 4):
-        return "based on your screening, the score of " +str(score)+ " suggests minimal or no depression, which may not need treatment. It is recommended to take the survey every two weeks as a follow-up."
-    if(score >= 5 and score <= 9):
-        return "based on your screening, the score of " +str(score)+ " suggests mild depression, which may require watchful waiting and repeated survey follow-ups. It is recommended to take the survey every two weeks."
-    if(score >= 10 and score <= 14):
-        return "based on your screening, the score of " +str(score)+ "suggests moderate depression severity. You may consider to see a therapist to prepare a treatment plan ranging from counseling, follow-up and possibly pharmacotherapy."
-    if(score >= 15 and score <= 20):
-        return "based on your screening, the score of " +str(score)+ "suggests moderately severe depression. You should see a therapist immediately to start pharmacotherapy and possibly psychotherapy. 
-    if(score > 20):
-        return "based on your screening, the score of " +str(score)+ "suggests severe depression. You should seek immediate help. Refer to a mental health specialist so you may begin treatment."
-    
-    
-#-------------------lambda function-----------------------#
-#TODO FOR ASADA: change intents to be appropriate with our functions
+        return "based on your screening, you score a 5 out of 5 on the well being scale."
+    elif(score >= 5 and score <= 9):
+        return "based on your screening, you score a 4 out of 5 on the well being scale."
+    elif(score >= 10 and score <= 14):
+        return "based on your screening, you score a 3 out of 5 on the well being scale."
+    elif(score >= 15 and score <= 20):
+        return "based on your screening, you score a 2 out of 5 on the well being scale."
+    elif(score > 20):
+        return "based on your screening, you score a 1 out of 5 on the well being scale."
+        
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
 
@@ -340,17 +420,6 @@ def on_intent(intent_request, session):
 
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
-    get_state(session)
-    
-    
-    # Dispatch to your skill's intent handlers
-    #if intent_name == "AdviceGiver":
-    #    return AdviceGiverAction(intent, session)
-    #elif intent_name == "ContinueConvo":
-    #    return ContinueConvoAction(intent, session)
-    #elif intent_name == "RecommendMeMusic":
-    #    return MusicAction(intent, session);    
-    
     
         #for key in event.key():
     #    message = message + " " + key
@@ -363,12 +432,18 @@ def on_intent(intent_request, session):
         return death_alert()
     elif intent_name == "FortuneCookie":
         return fortune_cookie()
+    elif intent_name == "ExerciseHabits":
+        return exercise_habits()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
     elif intent_name == "SurveyIntent":
-        return do_quiz(request)
+        return do_quiz(intent_request)
     elif intent_name == "AnswerIntent":
-        return answer(request, intent, session)
+        return answer(intent_request, intent, session)
+    elif intent_name == "SleepHabits":
+        return sleep_habits()
+    elif intent_name == "EatingHabits":
+        return eating_habits()
     #elif intent_name == "AMAZON.PauseIntent" or intent_name == "AMAZON.ResumeIntent"
     #    return do_something(); 
     else:
