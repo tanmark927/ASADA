@@ -191,6 +191,19 @@ def death_alert():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
+def give_thanks():
+    #test run to grab a fortune cookie
+    session_attributes = {}
+    card_title = "Give Thanks"
+    speech_output = "You are welcome. You are free to try the other services in ASADA such as the advice giver for" \
+             " eating and sleeping, as well as the fortune cookie."
+    reprompt_text = "I did not understand your command. " \
+    "You can ask ASADA to give a survey, give advice or just talk."
+    should_end_session = False
+    write_to_conversation(2222, 0, speech_output)
+    return build_response(session_attributes, build_speechlet_response(
+                card_title, speech_output, reprompt_text, should_end_session))    
+
 def fortune_cookie():
     #test run to grab a fortune cookie
     session_attributes = {}
@@ -334,6 +347,8 @@ def do_quiz(request):
     global COUNTER
     global STATE
     
+    
+    
     COUNTER = 0
     QUIZSCORE = 0
     STATE = STATE_SURVEY
@@ -435,6 +450,8 @@ def on_intent(intent_request, session):
         return sleep_habits()
     elif intent_name == "EatingHabits":
         return eating_habits()
+    elif intent_name == "GiveThanks":
+        return give_thanks()
     #elif intent_name == "AMAZON.PauseIntent" or intent_name == "AMAZON.ResumeIntent"
     #    return do_something(); 
     else:
