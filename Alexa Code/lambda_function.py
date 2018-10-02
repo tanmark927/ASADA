@@ -95,12 +95,12 @@ def build_response(session_attributes, speechlet_response):
 ITEMS = []
 ITEMS.append("Over the past 2 weeks, how often are you bothered with feeling little interest or pleasure in doing things?")
 ITEMS.append("Over the past 2 weeks, how often are you bothered with feeling down, depresed or hopelessness?")
-ITEMS.append("Over the past 2 weeks, how often do you have trouble falling aslkeep, staying asleep, or sleeping too much?")
+ITEMS.append("Over the past 2 weeks, how often do you have trouble falling asleep, staying asleep, or sleeping too much?")
 ITEMS.append("Over the past 2 weeks, how often are you feeling tired or having little energy for activities?")
 ITEMS.append("Over the past 2 weeks, how often are you bothered with a poor appetite or overeating?")
 ITEMS.append("Over the past 2 weeks, how often are you having bad thoughts about yourself?")
 ITEMS.append("Over the past 2 weeks, how often have you had trouble concentrating on an activity?")
-ITEMS.append("Over the past 2 weeks, how often are you bothered with moving or spekaing slowly? Or the opposite, feeling fidgety or restless")
+ITEMS.append("Over the past 2 weeks, how often are you bothered with moving or speaking slowly? Or the opposite, feeling fidgety or restless")
 ITEMS.append("Over the past 2 weeks, how often have you had thoughts that you are better off dead or thought of hurting yourself in some way?")
 
 
@@ -116,12 +116,12 @@ def get_welcome_response():
     card_title = "Welcome"
     speech_output = "Hello. " \
                     "Welcome to ASADA. " \
-                    "It will be your personal therapist. " \
-                    "Ask it anything that is on your mind. "
+                    "I will be your personal therapist. " \
+                    "Ask me anything that is on your mind. "
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
     reprompt_text = "ASADA will be your personal therapist. " \
-                    "Ask it anything that is on your mind. "
+                    "Ask me anything that is on your mind. "
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
@@ -183,7 +183,7 @@ def death_alert():
     #emergency suicide alert
     session_attributes = {}
     card_title = "911 emergency function"
-    speech_output = "ASADA recommends you call 911 or the suicide hotline 1 800 273 8255"
+    speech_output = "I recommend you call 911 or the suicide hotline 1 800 273 8255"
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
@@ -195,7 +195,7 @@ def give_thanks():
     #test run to grab a fortune cookie
     session_attributes = {}
     card_title = "Give Thanks"
-    speech_output = "You are welcome. You are free to try the other services in ASADA such as the advice giver for" \
+    speech_output = "You are welcome. You are free to try my other services such as the advice giver for" \
              " eating and sleeping, as well as the fortune cookie."
     reprompt_text = "I did not understand your command. " \
     "You can ask ASADA to give a survey, give advice or just talk."
