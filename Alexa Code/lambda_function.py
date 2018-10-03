@@ -6,6 +6,7 @@ import datetime
 import math
 import string
 import random
+from datetime import date
 
 #rds settings
 rds_host  = "asada.cofr9vg9xjlm.us-east-1.rds.amazonaws.com"
@@ -386,6 +387,12 @@ def answer_quiz(request, intent, session):
         return ask_question(request, "")
     speech_message += get_finalscore(QUIZSCORE)
     speech_message += get_result(QUIZSCORE)
+    
+    with conn.cursor() as cursor:
+        now = date.today()
+        sql = "INSERT INTO Survey (SurveyID, SurveyDate, SurveyScore, UserID) VALUES ({0}, '{1}', '{2}', {3});".format(2222, now, QUIZSCORE, '3567')
+        cursor.execute(sql)
+    conn.commit()
     
     STATE = STATE_START
     COUNTER = 0
