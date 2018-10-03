@@ -6,6 +6,7 @@ import datetime
 import math
 import string
 import random
+import uuid
 from datetime import date
 
 #rds settings
@@ -389,8 +390,9 @@ def answer_quiz(request, intent, session):
     speech_message += get_result(QUIZSCORE)
     
     with conn.cursor() as cursor:
+        surveyID = uuid.uuid4()
         now = date.today()
-        sql = "INSERT INTO Survey (SurveyID, SurveyDate, SurveyScore, UserID) VALUES ({0}, '{1}', '{2}', {3});".format(2222, now, QUIZSCORE, '3567')
+        sql = "INSERT INTO Survey (SurveyID, SurveyDate, SurveyScore, UserID) VALUES ('{0}', '{1}', '{2}', {3});".format(surveyID, now, QUIZSCORE, '3567')
         cursor.execute(sql)
     conn.commit()
     
