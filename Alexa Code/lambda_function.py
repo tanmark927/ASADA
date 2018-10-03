@@ -95,25 +95,20 @@ def build_response(session_attributes, speechlet_response):
 
 
 ITEMS = []
-ITEMS.append("Over the past 2 weeks, how often are you bothered with feeling little interest or pleasure in doing things?")
-ITEMS.append("Over the past 2 weeks, how often are you bothered with feeling down, depresed or hopelessness?")
-ITEMS.append("Over the past 2 weeks, how often do you have trouble falling asleep, staying asleep, or sleeping too much?")
-ITEMS.append("Over the past 2 weeks, how often are you feeling tired or having little energy for activities?")
-ITEMS.append("Over the past 2 weeks, how often are you bothered with a poor appetite or overeating?")
-ITEMS.append("Over the past 2 weeks, how often are you having bad thoughts about yourself?")
-ITEMS.append("Over the past 2 weeks, how often have you had trouble concentrating on an activity?")
-ITEMS.append("Over the past 2 weeks, how often are you bothered with moving or speaking slowly? Or the opposite, feeling fidgety or restless")
-ITEMS.append("Over the past 2 weeks, how often have you had thoughts that you are better off dead or thought of hurting yourself in some way?")
+ITEMS.append("How often are you bothered with feeling little interest or pleasure in doing things?")
+ITEMS.append("How often are you bothered with feeling down, depresed or hopelessness?")
+ITEMS.append("How often do you have trouble falling asleep, staying asleep, or sleeping too much?")
+ITEMS.append("How often are you feeling tired or having little energy for activities?")
+ITEMS.append("How often are you bothered with a poor appetite or overeating?")
+ITEMS.append("How often are you having bad thoughts about yourself?")
+ITEMS.append("How often have you had trouble concentrating on an activity?")
+ITEMS.append("How often are you bothered with moving or speaking slowly? Or the opposite, feeling fidgety or restless")
+ITEMS.append("How often have you had thoughts that you are better off dead or thought of hurting yourself in some way?")
 
 
 # --------------- Functions that control the skill's behavior ------------------
 
-#TODO FOR ASADA: change intents to be appropriate with our functions
 def get_welcome_response():
-    """ If we wanted to initialize the session to have some attributes we could
-    add those here
-    """
-
     session_attributes = {}
     card_title = "Welcome"
     speech_output = "Hello. " \
@@ -132,6 +127,7 @@ def handle_session_end_request():
     card_title = "Session Ended"
     speech_output = "Thank you for using ASADA. " \
                     "Have a nice day! "
+    
     # Setting this to true ends the session and exits the skill.
     should_end_session = True
     return build_response({}, build_speechlet_response(
@@ -141,7 +137,6 @@ def handle_session_end_request():
 
 def on_session_started(session_started_request, session):
     """ Called when the session starts """
-
     print("on_session_started requestId=" + session_started_request['requestId']
           + ", sessionId=" + session['sessionId'])
 
@@ -150,12 +145,33 @@ def on_launch(launch_request, session):
     """ Called when the user launches the skill without specifying what they
     want
     """
-
     print("on_launch requestId=" + launch_request['requestId'] +
           ", sessionId=" + session['sessionId'])
     # Dispatch to your skill's launch
     return get_welcome_response()
 
+#TODO: want to parse response from user's "my name is [name here]"
+
+#def user_intro():
+#    session_attributes = {}
+#    card_title = "User Introduction"
+#    username =  this.event.request.intent.slots.name.value
+#    #ASSIGN THIS USERNAME AS A GLOBAL VARIABLE FOR THE SESSION
+     #IT IS IMPORTANT THIS IS DONE BEFORE OTHER INTENTS
+
+    #if username can be found in Users table
+        #welcome back user
+    #else:
+        #introduce ASADA to new user
+        #add new row into users table
+        
+#    speech_output = ""
+#    reprompt_text = "I did not understand your command. " \
+#        "You can say take a test, give me an advice or just talk."
+#    should_end_session = False
+#    write_to_conversation(2222, 0, speech_output)
+#    return build_response(session_attributes, build_speechlet_response(
+#        card_title, speech_output, reprompt_text, should_end_session))
 
 def calculate_well_being(score):
     if (score >= 0 and score <= 4):
@@ -461,8 +477,8 @@ def on_intent(intent_request, session):
         return eating_habits()
     elif intent_name == "GiveThanks":
         return give_thanks()
-    #elif intent_name == "AMAZON.PauseIntent" or intent_name == "AMAZON.ResumeIntent"
-    #    return do_something(); 
+    #elif intent_name == "UserIntroduction":
+    #    return user_intro()
     else:
         raise ValueError("Invalid intent")
 
