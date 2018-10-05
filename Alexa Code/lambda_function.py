@@ -27,6 +27,12 @@ END_STATEMENT = "Thank you for completing the Patient Health Questionnaire. "
 
 USE_CARDS_FLAG = False
 
+USER_IDENTIFICATION = 0000
+#TODO: initialize as global in functions
+
+USER_WELL_BEING = 0
+#TODO: initialize as global in functions
+
 STATE_START = "Start"
 STATE_SURVEY = "Questionnaire"
 
@@ -150,29 +156,6 @@ def on_launch(launch_request, session):
     # Dispatch to your skill's launch
     return get_welcome_response()
 
-#TODO: want to parse response from user's "my name is [name here]"
-
-#def user_intro():
-#    session_attributes = {}
-#    card_title = "User Introduction"
-#    username =  this.event.request.intent.slots.name.value
-#    #ASSIGN THIS USERNAME AS A GLOBAL VARIABLE FOR THE SESSION
-     #IT IS IMPORTANT THIS IS DONE BEFORE OTHER INTENTS
-
-    #if username can be found in Users table
-        #welcome back user
-    #else:
-        #introduce ASADA to new user
-        #add new row into users table
-        
-#    speech_output = ""
-#    reprompt_text = "I did not understand your command. " \
-#        "You can say take a test, give me an advice or just talk."
-#    should_end_session = False
-#    write_to_conversation(2222, 0, speech_output)
-#    return build_response(session_attributes, build_speechlet_response(
-#        card_title, speech_output, reprompt_text, should_end_session))
-
 def calculate_well_being(score):
     if (score >= 0 and score <= 4):
         return 5;
@@ -193,7 +176,7 @@ def help_asada():
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
-    write_to_conversation(2222, 0, speech_output)
+    write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
     
@@ -201,11 +184,12 @@ def death_alert():
     #emergency suicide alert
     session_attributes = {}
     card_title = "911 emergency function"
-    speech_output = "I recommend you call 911 or the suicide hotline 1 800 273 8255"
+    speech_output = "I recommend you call 911 or the suicide hotline 1 800 273 8255" \
+        "You are " + USER_IDENTIFICATION + "."
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
-    write_to_conversation(2222, 0, speech_output)
+    write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
@@ -218,7 +202,7 @@ def give_thanks():
     reprompt_text = "I did not understand your command. " \
     "You can ask ASADA to give a survey, give advice or just talk."
     should_end_session = False
-    write_to_conversation(2222, 0, speech_output)
+    write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))    
 
@@ -235,9 +219,38 @@ def fortune_cookie():
         reprompt_text = "I did not understand your command. " \
         "You can ask ASADA to give a survey, give advice or just talk."
         should_end_session = False
-        write_to_conversation(2222, 0, speech_output)
+        write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
+
+#TODO: want to parse response from user's "my name is [name here]"
+
+def user_intro(intent):
+    session_attributes = {}
+    card_title = "User Introduction"
+    UserName =  intent['slots']['FirstName']['value']
+    #ASSIGN THIS USERNAME AS A GLOBAL VARIABLE FOR THE SESSION
+    #IT IS IMPORTANT THIS IS DONE BEFORE OTHER INTENTS
+    
+    with conn.cursor() as cur:
+        cur.execute("select UserID from Users where UserName = %s", [UserName])
+        result = cur.fetchone()
+    
+        try:
+            USER_IDENTIFICATION = float(result[0])
+    
+            speech_output = "Welcome, " + UserName + " to ASADA."
+        except ValueError:
+            speech_output = "Excuse me but who are you?" \
+                "You can make an account by saying Please make an account"
+        
+    reprompt_text = "You can make an account by saying Please make an account"
+    should_end_session = False
+    write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
+        
+   
 
 def exercise_habits():
     #test run to get exercise advice
@@ -275,7 +288,7 @@ def exercise_habits():
         reprompt_text = "I did not understand your command. " \
         "You can ask ASADA to give a survey, give advice or just talk."
         should_end_session = False
-        write_to_conversation(2222, 0, speech_output)
+        write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
 
@@ -308,7 +321,7 @@ def sleep_habits():
         reprompt_text = "I did not understand your command. " \
         "You can ask ASADA to give a survey, give advice or just talk."
         should_end_session = False
-        write_to_conversation(2222, 0, speech_output)
+        write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
     
@@ -329,7 +342,7 @@ def eating_habits():
         reprompt_text = "I did not understand your command. " \
         "You can ask ASADA to give a survey, give advice or just talk."
         should_end_session = False
-        write_to_conversation(2222, 0, speech_output)
+        write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
 #-----------------------Quiz function---------------#
@@ -455,7 +468,7 @@ def on_intent(intent_request, session):
         #for key in event.key():
     #    message = message + " " + key
         
-    write_to_conversation(2222, 1, intent_name)
+    write_to_conversation(USER_IDENTIFICATION, 1, intent_name)
     
     if intent_name == "AMAZON.HelpIntent":
         return help_asada()
@@ -477,8 +490,8 @@ def on_intent(intent_request, session):
         return eating_habits()
     elif intent_name == "GiveThanks":
         return give_thanks()
-    #elif intent_name == "UserIntroduction":
-    #    return user_intro()
+    elif intent_name == "UserIntroduction":
+        return user_intro(intent)
     else:
         raise ValueError("Invalid intent")
 
