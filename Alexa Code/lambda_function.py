@@ -6,6 +6,8 @@ import datetime
 import math
 import string
 import random
+import uuid
+from datetime import date
 
 #rds settings
 rds_host  = "asada.cofr9vg9xjlm.us-east-1.rds.amazonaws.com"
@@ -17,13 +19,20 @@ db_name = "asadaDB"
 
 OPENING_MESSAGE = "This is the Patient Health Questionnaire. " \
                    "It will measure the severity and presence of depression. " \
-                   "The higher your score, the more severe your depression is. "
+                   "The higher your score, the more severe your depression is. " \
+                   "You can answer by saying not at all, several days, more than half or nearly everyday. "
 
 SKILL_TITLE = "Patient Health Questionnaire"
 BEGIN_STATEMENT = "You will be asked 9 questions about problems you have faced in the past two weeks. "
 END_STATEMENT = "Thank you for completing the Patient Health Questionnaire. "
 
 USE_CARDS_FLAG = False
+
+USER_IDENTIFICATION = 2222
+#TODO: initialize as global in functions
+
+USER_WELL_BEING = 0
+#TODO: initialize as global in functions
 
 STATE_START = "Start"
 STATE_SURVEY = "Questionnaire"
@@ -93,35 +102,36 @@ def build_response(session_attributes, speechlet_response):
 
 
 ITEMS = []
-ITEMS.append("Over the past 2 weeks, how often are you bothered with feeling little interest or pleasure in doing things?")
-ITEMS.append("Over the past 2 weeks, how often are you bothered with feeling down, depresed or hopelessness?")
-ITEMS.append("Over the past 2 weeks, how often do you have trouble falling aslkeep, staying asleep, or sleeping too much?")
-ITEMS.append("Over the past 2 weeks, how often are you feeling tired or having little energy for activities?")
-ITEMS.append("Over the past 2 weeks, how often are you bothered with a poor appetite or overeating?")
-ITEMS.append("Over the past 2 weeks, how often are you having bad thoughts about yourself?")
-ITEMS.append("Over the past 2 weeks, how often have you had trouble concentrating on an activity?")
-ITEMS.append("Over the past 2 weeks, how often are you bothered with moving or spekaing slowly? Or the opposite, feeling fidgety or restless")
-ITEMS.append("Over the past 2 weeks, how often have you had thoughts that you are better off dead or thought of hurting yourself in some way?")
+ITEMS.append("How often are you bothered with feeling little interest or pleasure in doing things?")
+ITEMS.append("How often are you bothered with feeling down, depresed or hopelessness?")
+ITEMS.append("How often do you have trouble falling asleep, staying asleep, or sleeping too much?")
+ITEMS.append("How often are you feeling tired or having little energy for activities?")
+ITEMS.append("How often are you bothered with a poor appetite or overeating?")
+ITEMS.append("How often are you having bad thoughts about yourself?")
+ITEMS.append("How often have you had trouble concentrating on an activity?")
+ITEMS.append("How often are you bothered with moving or speaking slowly? Or the opposite, feeling fidgety or restless")
+ITEMS.append("How often have you had thoughts that you are better off dead or thought of hurting yourself in some way?")
 
 
 # --------------- Functions that control the skill's behavior ------------------
 
-#TODO FOR ASADA: change intents to be appropriate with our functions
 def get_welcome_response():
-    """ If we wanted to initialize the session to have some attributes we could
-    add those here
-    """
-
     session_attributes = {}
     card_title = "Welcome"
     speech_output = "Hello. " \
                     "Welcome to ASADA. " \
-                    "It will be your personal therapist. " \
-                    "Ask it anything that is on your mind. "
+                    "I will be your personal therapist. " \
+                    "You can request a well being survey, ask for general advice, " \
+                    "ask for more specific advice like eating, sleeping and exercise, " \
+                    "or hear a random motivational quote. You will also receive advice " \
+                    "in the case that I hear a statement of self harm."
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
-    reprompt_text = "ASADA will be your personal therapist. " \
-                    "Ask it anything that is on your mind. "
+    reprompt_text = "I will be your personal therapist. " \
+                    "You can request a well being survey, ask for general advice, " \
+                    "ask for more specific advice like eating, sleeping and exercise, " \
+                    "or hear a random motivational quote. You will also receive advice " \
+                    "in the case that I hear a statement of self harm."
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
@@ -130,6 +140,7 @@ def handle_session_end_request():
     card_title = "Session Ended"
     speech_output = "Thank you for using ASADA. " \
                     "Have a nice day! "
+    
     # Setting this to true ends the session and exits the skill.
     should_end_session = True
     return build_response({}, build_speechlet_response(
@@ -139,7 +150,6 @@ def handle_session_end_request():
 
 def on_session_started(session_started_request, session):
     """ Called when the session starts """
-
     print("on_session_started requestId=" + session_started_request['requestId']
           + ", sessionId=" + session['sessionId'])
 
@@ -148,12 +158,10 @@ def on_launch(launch_request, session):
     """ Called when the user launches the skill without specifying what they
     want
     """
-
     print("on_launch requestId=" + launch_request['requestId'] +
           ", sessionId=" + session['sessionId'])
     # Dispatch to your skill's launch
     return get_welcome_response()
-
 
 def calculate_well_being(score):
     if (score >= 0 and score <= 4):
@@ -171,11 +179,11 @@ def help_asada():
     #help function for asada
     session_attributes = {}
     card_title = "help function"
-    speech_output = "You can say, take a test, give me an advice, or just talk"
+    speech_output = "You can say, take a survey, give me an advice,=. It could be an eating, fitness or sleeping advice."
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
-    write_to_conversation(2222, 0, speech_output)
+    write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
     
@@ -183,13 +191,26 @@ def death_alert():
     #emergency suicide alert
     session_attributes = {}
     card_title = "911 emergency function"
-    speech_output = "ASADA recommends you call 911 or the suicide hotline 1 800 273 8255"
+    speech_output = "I recommend you call 911 or the suicide hotline 1 800 273 8255"
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
-    write_to_conversation(2222, 0, speech_output)
+    write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
+
+def give_thanks():
+    #test run to grab a fortune cookie
+    session_attributes = {}
+    card_title = "Give Thanks"
+    speech_output = "You are welcome. You are free to try my other services such as the advice giver for" \
+             " eating and sleeping, as well as the fortune cookie."
+    reprompt_text = "I did not understand your command. " \
+    "You can ask ASADA to give a survey, give advice or just talk."
+    should_end_session = False
+    write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
+    return build_response(session_attributes, build_speechlet_response(
+                card_title, speech_output, reprompt_text, should_end_session))    
 
 def fortune_cookie():
     #test run to grab a fortune cookie
@@ -204,9 +225,38 @@ def fortune_cookie():
         reprompt_text = "I did not understand your command. " \
         "You can ask ASADA to give a survey, give advice or just talk."
         should_end_session = False
-        write_to_conversation(2222, 0, speech_output)
+        write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
+
+#TODO: want to parse response from user's "my name is [name here]"
+
+def user_intro(intent):
+    session_attributes = {}
+    card_title = "User Introduction"
+    UserName =  intent['slots']['FirstName']['value']
+    #ASSIGN THIS USERNAME AS A GLOBAL VARIABLE FOR THE SESSION
+    #IT IS IMPORTANT THIS IS DONE BEFORE OTHER INTENTS
+    
+    with conn.cursor() as cur:
+        try:
+            #cur.execute("SELECT UserID FROM Users WHERE asadaDB.UserName = 'Brian'")
+            #result = cur.fetchone()
+            
+            #USER_IDENTIFICATION = float(result[0])
+    
+            speech_output = "Welcome " + UserName + ",  to ASADA."
+        except ValueError:
+            speech_output = "Excuse me but who are you?" \
+                "You can make an account by saying Please make an account"
+        
+    reprompt_text = "You can make an account by saying Please make an account"
+    should_end_session = False
+    write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
+        
+   
 
 def exercise_habits():
     #test run to get exercise advice
@@ -244,7 +294,7 @@ def exercise_habits():
         reprompt_text = "I did not understand your command. " \
         "You can ask ASADA to give a survey, give advice or just talk."
         should_end_session = False
-        write_to_conversation(2222, 0, speech_output)
+        write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
 
@@ -277,7 +327,7 @@ def sleep_habits():
         reprompt_text = "I did not understand your command. " \
         "You can ask ASADA to give a survey, give advice or just talk."
         should_end_session = False
-        write_to_conversation(2222, 0, speech_output)
+        write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
     
@@ -298,7 +348,7 @@ def eating_habits():
         reprompt_text = "I did not understand your command. " \
         "You can ask ASADA to give a survey, give advice or just talk."
         should_end_session = False
-        write_to_conversation(2222, 0, speech_output)
+        write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
 #-----------------------Quiz function---------------#
@@ -371,15 +421,14 @@ def answer_quiz(request, intent, session):
         
     if COUNTER < len(ITEMS):
         return ask_question(request, "")
-    speech_message += get_finalscore(QUIZSCORE)
     speech_message += get_result(QUIZSCORE)
     
-#     with conn.cursor() as cursor:
-#        now = datetime.datetime.now()
-#        date = now.strftime("%Y-%m-%d")
-#        sql = "INSERT INTO Survey (SurveyID, SurveyDate, SurveyScore) VALUES ({0}, {1}, '{2}');".format(2222, date, QUIZSCORE)
-#        cursor.execute(sql)
-#    conn.commit()
+    with conn.cursor() as cursor:
+        surveyID = uuid.uuid4()
+        now = date.today()
+        sql = "INSERT INTO Survey (SurveyID, SurveyDate, SurveyScore, UserID) VALUES ('{0}', '{1}', '{2}', {3});".format(surveyID, now, QUIZSCORE, '3567')
+        cursor.execute(sql)
+    conn.commit()
     
     STATE = STATE_START
     COUNTER = 0
@@ -397,20 +446,19 @@ def answer_quiz(request, intent, session):
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_message, reprompt_text, should_end_session))
     
-def get_finalscore(score):
-    return "your final score is "+str(score)+". "
-    
 def get_result(score):
     if(score >= 0 and score <= 4):
-        return "based on your screening, you score a 5 out of 5 on the well being scale."
+        return "based on your screening, You should consult with ASADA at least once every two weeks."
     elif(score >= 5 and score <= 9):
-        return "based on your screening, you score a 4 out of 5 on the well being scale."
+        return "based on your screening, You should consult with ASADA at least once every few days. It is recommended to take the survey every two weeks."
     elif(score >= 10 and score <= 14):
-        return "based on your screening, you score a 3 out of 5 on the well being scale."
+        return "based on your screening, You should consult with ASADA at least once a day. It is recommended to take the survey every two weeks."
     elif(score >= 15 and score <= 20):
-        return "based on your screening, you score a 2 out of 5 on the well being scale."
+        return "based on your screening, You should consult with ASADA once a day." \
+        "It is recommended to seek professional help. It is recommended to take the survey every two weeks."
     elif(score > 20):
-        return "based on your screening, you score a 1 out of 5 on the well being scale."
+        return "based on your screening, You should consult your doctor about your condition. There are lots of treatment options, " \
+        "and getting onto it as soon as possible could bring your life back. It is recommended to take the survey every two weeks."
         
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
@@ -424,7 +472,7 @@ def on_intent(intent_request, session):
         #for key in event.key():
     #    message = message + " " + key
         
-    write_to_conversation(2222, 1, intent_name)
+    write_to_conversation(USER_IDENTIFICATION, 1, intent_name)
     
     if intent_name == "AMAZON.HelpIntent":
         return help_asada()
@@ -444,8 +492,10 @@ def on_intent(intent_request, session):
         return sleep_habits()
     elif intent_name == "EatingHabits":
         return eating_habits()
-    #elif intent_name == "AMAZON.PauseIntent" or intent_name == "AMAZON.ResumeIntent"
-    #    return do_something(); 
+    elif intent_name == "GiveThanks":
+        return give_thanks()
+    elif intent_name == "UserIntroduction":
+        return user_intro(intent)
     else:
         raise ValueError("Invalid intent")
 
