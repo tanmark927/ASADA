@@ -28,6 +28,8 @@ END_STATEMENT = "Thank you for completing the Patient Health Questionnaire. "
 
 USE_CARDS_FLAG = False
 
+LAST_SPOKEN = ""
+
 USER_IDENTIFICATION = 2222
 #TODO: initialize as global in functions
 
@@ -131,10 +133,9 @@ def get_welcome_response():
                     "ask for more specific advice like eating, sleeping and exercise, " \
                     "or hear a random motivational quote. You will also receive advice " \
                     "in the case that I hear a statement of self harm."
-    session_attributes = {}
-    #session_attributes = {
-    #    'speech_output_key' : speech_output
-    #}
+    session_attributes = {
+        'lastSpoken' : speech_output
+    }
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
@@ -185,28 +186,30 @@ def help_asada():
     reprompt_text = "I did not understand your command. " \
         "You can say take a test, give me an advice or just talk."
     should_end_session = False
-    session_attributes = {}
-    #session_attributes = {
-    #    'speech_output_key' : speech_output
-    #}
+    session_attributes = {
+        'lastSpoken' : speech_output
+    }
     write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
         
-#def repeat_command():
-#    card_title = ""
-#    session_attributes = {}
-#    speech_output = ""
-#    reprompt_text = ""
-#    if not( session['attributes']['speech_output_key'] is None):
-#        speech_output = session['attributes']['speech_output_key']
-#        reprompt_text = speech_output
-#        should_end_session = False
-#        session_attributes = {
-#            'speech_output_key' : speech_output
-#        }
-#    return build_response(session_attributes, build_speechlet_response(
-#        card_title, speech_output, reprompt_text, should_end_session))
+def repeat_command(session):
+    global LAST_SPOKEN    
+
+    card_title = ""
+    session_attributes = {}
+    speech_output = ""
+    reprompt_text = ""
+    if not( session['attributes']['lastSpoken'] is None):
+        speech_output = session['attributes']['lastSpoken']
+        reprompt_text = speech_output
+        globals()['LAST_SPOKEN'] = speech_output
+        should_end_session = False
+        session_attributes = {
+            'lastSpoken' : globals()['LAST_SPOKEN']
+        }
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
     
 def death_alert():
     #emergency suicide alert
@@ -218,10 +221,9 @@ def death_alert():
         "or hear a random motivational quote. You will also receive advice " \
         "in the case that I hear a statement of self harm."
     should_end_session = False
-    session_attributes = {}
-    #session_attributes = {
-    #    'speech_output_key' : speech_output
-    #}
+    session_attributes = {
+        'lastSpoken' : speech_output
+    }
     write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
@@ -237,10 +239,9 @@ def give_thanks():
     "or hear a random motivational quote. You will also receive advice " \
     "in the case that I hear a statement of self harm."
     should_end_session = False
-    session_attributes = {}
-    #session_attributes = {
-    #    'speech_output_key' : speech_output
-    #}
+    session_attributes = {
+        'lastSpoken' : speech_output
+    }
     write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))    
@@ -260,10 +261,9 @@ def fortune_cookie():
         "or hear a random motivational quote. You will also receive advice " \
         "in the case that I hear a statement of self harm."
         should_end_session = False
-        session_attributes = {}
-        #session_attributes = {
-        #    'speech_output_key' : speech_output
-        #}
+        session_attributes = {
+            'lastSpoken' : speech_output
+        }
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
@@ -290,10 +290,9 @@ def user_intro(intent):
         
     reprompt_text = "You can make an account by saying Please make an account"
     should_end_session = False
-    session_attributes = {}
-    #session_attributes = {
-    #    'speech_output_key' : speech_output
-    #}
+    session_attributes = {
+        'lastSpoken' : speech_output
+    }
     write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
@@ -334,10 +333,9 @@ def exercise_habits():
         speech_output = result[0]
         reprompt_text = ""
         should_end_session = False
-        session_attributes = {}
-        #session_attributes = {
-        #    'speech_output_key' : speech_output
-        #}
+        session_attributes = {
+            'lastSpoken' : speech_output
+        }
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
@@ -373,10 +371,9 @@ def sleep_habits():
         "or hear a random motivational quote. You will also receive advice " \
         "in the case that I hear a statement of self harm."
         should_end_session = False
-        session_attributes = {}
-        #session_attributes = {
-        #    'speech_output_key' : speech_output
-        #}
+        session_attributes = {
+            'lastSpoken' : speech_output
+        }
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
@@ -400,10 +397,9 @@ def eating_habits():
         "or hear a random motivational quote. You will also receive advice " \
         "in the case that I hear a statement of self harm."
         should_end_session = False
-        session_attributes = {}
-        #session_attributes = {
-        #    'speech_output_key' : speech_output
-        #}
+        session_attributes = {
+            'lastSpoken' : speech_output
+        }
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
@@ -425,6 +421,7 @@ def ask_question(request, speech_output):
     session_attributes = {"quizscore":globals()['QUIZSCORE'],
                   "quizproperty":quiz_question,
                   "response":speech_output,
+                  'lastSpoken' : speech_output,
                   "state": globals()['STATE'],
                   "counter":globals()['COUNTER'],
                  }
@@ -460,10 +457,9 @@ def answer(request, intent, session):
     card_title = "Gave survey answers while not in survey process"
     should_end_session = False
     reprompt_text = "I did not understand your command. "
-    session_attributes = {}
-    #session_attributes = {
-    #    'speech_output_key' : speech_output
-    #}
+    session_attributes = {
+        'lastSpoken' : speech_output
+    }
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
     
@@ -560,8 +556,8 @@ def on_intent(intent_request, session):
         return give_thanks()
     elif intent_name == "UserIntroduction":
         return user_intro(intent)
-    #elif intent_name == "AMAZON.RepeatIntent":
-    #    return repeat_command()
+    elif intent_name == "AMAZON.RepeatIntent":
+        return repeat_command(session)
     else:
         raise ValueError("Invalid intent")
 
