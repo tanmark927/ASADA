@@ -18,8 +18,7 @@ db_name = "asadaDB"
 #-------variables for survey-------
 
 OPENING_MESSAGE = "This is the Patient Health Questionnaire. " \
-                   "It will measure the severity and presence of depression. " \
-                   "The higher your score, the more severe your depression is. " \
+                   "It will measure the status of your well-being. " \
                    "You can answer by saying not at all, several days, more than half or nearly everyday. "
 
 SKILL_TITLE = "Patient Health Questionnaire"
@@ -29,10 +28,7 @@ END_STATEMENT = "Thank you for completing the Patient Health Questionnaire. "
 USE_CARDS_FLAG = False
 
 LAST_SPOKEN = ""
-
 USER_IDENTIFICATION = 2222
-#TODO: initialize as global in functions
-
 USER_WELL_BEING = 0
 #TODO: initialize as global in functions
 
@@ -47,8 +43,6 @@ SAYAS_INTERJECT = "<say-as interpret-as='interjection'>"
 SAYAS_SPELLOUT = "<say-as interpret-as='spell-out'>"
 SAYAS = "</say-as>"
 BREAKSTRONG = "<break strength='strong'/>"
-
-
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -122,17 +116,12 @@ def get_welcome_response():
     speech_output = "Hello. " \
                     "Welcome to ASADA. " \
                     "I will be your personal therapist. " \
-                    "You can request a well being survey, ask for general advice, " \
-                    "ask for more specific advice like eating, sleeping and exercise, " \
-                    "or hear a random motivational quote. You will also receive advice " \
-                    "in the case that I hear a statement of self harm."
+                    "If you need help, try saying, " \
+                    "ASADA help, for help talking to me"
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
     reprompt_text = "I will be your personal therapist. " \
-                    "You can request a well being survey, ask for general advice, " \
-                    "ask for more specific advice like eating, sleeping and exercise, " \
-                    "or hear a random motivational quote. You will also receive advice " \
-                    "in the case that I hear a statement of self harm."
+                    "Try saying, ASADA help, for help talking to me"
     session_attributes = {
         'lastSpoken' : speech_output
     }
@@ -180,11 +169,15 @@ def calculate_well_being(score):
         return 1;
 
 def help_asada():
+    global USER_IDENTIFICATION
     #help function for asada
     card_title = "help function"
-    speech_output = "You can say, take a survey, give me an advice. It could be an eating, fitness, sleeping or regular advice."
+    speech_output = "You can request a well being survey, ask for general advice, " \
+                    "ask for more specific advice like eating, sleeping and exercise, " \
+                    "or hear a random motivational quote. You will also receive advice " \
+                    "in the case that I hear a statement of self harm."
     reprompt_text = "I did not understand your command. " \
-        "You can say take a test, give me an advice or just talk."
+                    "Try saying, ASADA help, for help talking to me"
     should_end_session = False
     session_attributes = {
         'lastSpoken' : speech_output
@@ -208,18 +201,25 @@ def repeat_command(session):
         session_attributes = {
             'lastSpoken' : globals()['LAST_SPOKEN']
         }
+    if (session['attributes']['state'] == STATE_SURVEY):
+        session_attributes = {
+                "quizscore":session['attributes']['quizscore'],
+                "quizproperty":session['attributes']['quizproperty'],
+                "response":session['attributes']['response'],
+                'lastSpoken' : speech_output,
+                "state": session['attributes']['state'],
+                "counter": session['attributes']['counter'],
+        }
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
     
 def death_alert():
     #emergency suicide alert
+    global USER_IDENTIFICATION
     card_title = "911 emergency function"
     speech_output = "I recommend you call 911 or the suicide hotline 1 800 273 8255"
     reprompt_text = "I did not understand your command. " \
-        "You can request a well being survey, ask for general advice, " \
-        "ask for more specific advice like eating, sleeping and exercise, " \
-        "or hear a random motivational quote. You will also receive advice " \
-        "in the case that I hear a statement of self harm."
+                    "Try saying, ASADA help, for help talking to me"
     should_end_session = False
     session_attributes = {
         'lastSpoken' : speech_output
@@ -229,15 +229,13 @@ def death_alert():
         card_title, speech_output, reprompt_text, should_end_session))
 
 def give_thanks():
+    global USER_IDENTIFICATION
     #test run to grab a fortune cookie
     card_title = "Give Thanks"
     speech_output = "You are welcome. You are free to try my other services such as the advice giver for" \
              " eating and sleeping, as well as the fortune cookie."
     reprompt_text = "I did not understand your command. " \
-    "You can request a well being survey, ask for general advice, " \
-    "ask for more specific advice like eating, sleeping and exercise, " \
-    "or hear a random motivational quote. You will also receive advice " \
-    "in the case that I hear a statement of self harm."
+                    "Try saying, ASADA help, for help talking to me"
     should_end_session = False
     session_attributes = {
         'lastSpoken' : speech_output
@@ -248,18 +246,15 @@ def give_thanks():
 
 def fortune_cookie():
     #test run to grab a fortune cookie
+    global USER_IDENTIFICATION
     card_title = "Fortune Cookie"
     result = ""
     with conn.cursor() as cur:
-        #change query later to tie more closely to survey
         cur.execute("select FC_Message from FortuneCookie ORDER BY RAND() LIMIT 1")
         result = cur.fetchone()
         speech_output = result[0]
         reprompt_text = "I did not understand your command. " \
-        "You can request a well being survey, ask for general advice, " \
-        "ask for more specific advice like eating, sleeping and exercise, " \
-        "or hear a random motivational quote. You will also receive advice " \
-        "in the case that I hear a statement of self harm."
+                    "Try saying, ASADA help, for help talking to me"
         should_end_session = False
         session_attributes = {
             'lastSpoken' : speech_output
@@ -268,27 +263,28 @@ def fortune_cookie():
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
 
-#TODO: want to parse response from user's "my name is [name here]"
 
 def user_intro(intent):
+    global USER_IDENTIFICATION
+    global QUIZSCORE
     card_title = "User Introduction"
-    UserName =  intent['slots']['FirstName']['value']
-    #ASSIGN THIS USERNAME AS A GLOBAL VARIABLE FOR THE SESSION
-    #IT IS IMPORTANT THIS IS DONE BEFORE OTHER INTENTS
-    
+    u_name =  intent['slots']['FirstName']['value']
+
     with conn.cursor() as cur:
         try:
-            #cur.execute("SELECT UserID FROM Users WHERE asadaDB.UserName = 'Brian'")
-            #result = cur.fetchone()
+            cur.execute("select UserID from Users where UserName = %s LIMIT 1", [u_name])
+            result = cur.fetchone()
+            USER_IDENTIFICATION = result[0]
             
-            #USER_IDENTIFICATION = float(result[0])
-    
-            speech_output = "Welcome " + UserName + ",  to ASADA."
+            cur.execute("select SurveyScore from Survey where UserID = %s order by SurveyDate desc limit 1", [USER_IDENTIFICATION])
+            result_two = cur.fetchone()
+            QUIZSCORE = result_two[0]
+            
+            speech_output = "Welcome " + u_name + " to ASADA."
         except ValueError:
-            speech_output = "Excuse me but who are you?" \
-                "You can make an account by saying Please make an account"
+            speech_output = "Excuse me but who are you?"
         
-    reprompt_text = "You can make an account by saying Please make an account"
+    reprompt_text = "Excuse me but who are you? Please restate your name"
     should_end_session = False
     session_attributes = {
         'lastSpoken' : speech_output
@@ -301,29 +297,31 @@ def user_intro(intent):
 
 def exercise_habits():
     #test run to get exercise advice
+    global USER_IDENTIFICATION
+    global QUIZSCORE
     card_title = "Exercise Habits"
     result = ""
     exercise_intensity = 0
     with conn.cursor() as cur:
         cur.execute("select * from Conversation order by conversationID desc limit 1;")
         first_result = cur.fetchone()
-        well_being = calculate_well_being(QUIZSCORE)
+        well_being = calculate_well_being(globals()['QUIZSCORE'])
 
         if 'arms' in first_result:
-            # cur.execute("select FA_Description from FitnessActivity where FA_Category = 'arms' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
-            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'arms' ORDER BY RAND() LIMIT 1")
+            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'arms' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
+            #cur.execute("select FA_Description from FitnessActivity where FA_Category = 'arms' ORDER BY RAND() LIMIT 1")
             result = cur.fetchone()
         elif 'legs' in first_result:
-            # cur.execute("select FA_Description from FitnessActivity where FA_Category = 'legs' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
-            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'legs' ORDER BY RAND() LIMIT 1")
+            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'legs' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
+            #cur.execute("select FA_Description from FitnessActivity where FA_Category = 'legs' ORDER BY RAND() LIMIT 1")
             result = cur.fetchone()
         elif 'chest' in first_result:
-            # cur.execute("select FA_Description from FitnessActivity where FA_Category = 'chest' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
-            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'chest' ORDER BY RAND() LIMIT 1")
+            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'chest' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
+            #cur.execute("select FA_Description from FitnessActivity where FA_Category = 'chest' ORDER BY RAND() LIMIT 1")
             result = cur.fetchone()
         elif 'back' in first_result:
-            # cur.execute("select FA_Description from FitnessActivity where FA_Category = 'back' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
-            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'back' ORDER BY RAND() LIMIT 1")
+            cur.execute("select FA_Description from FitnessActivity where FA_Category = 'back' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
+            #cur.execute("select FA_Description from FitnessActivity where FA_Category = 'back' ORDER BY RAND() LIMIT 1")
             result = cur.fetchone()
         else:
             #execute this query if user command does not specify area of exercise
@@ -354,22 +352,23 @@ def severity_calculator(well_being_score):
 
 def sleep_habits():
     #retrieve a piece of sleep advice for the user
+    global USER_IDENTIFICATION
+    global QUIZSCORE
     card_title = "Sleep Habits"
     result = ""
     with conn.cursor() as cur:
-        well_being = calculate_well_being(QUIZSCORE)
+        well_being = calculate_well_being(globals()['QUIZSCORE'])
         severity = severity_calculator(well_being)
 
-        #cur.execute("select advice from SleepAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
-        #comment or erase below query if above query is present
-        cur.execute("select advice from SleepAdvice ORDER BY RAND() LIMIT 1")
+        #use as backup
+        #cur.execute("select advice from SleepAdvice ORDER BY RAND() LIMIT 1")
+
+        #only works for severity 1 at the moment
+        cur.execute("select advice from SleepAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
         result = cur.fetchone()
         speech_output = result[0]
         reprompt_text = "I did not understand your command. " \
-        "You can request a well being survey, ask for general advice, " \
-        "ask for more specific advice like eating, sleeping and exercise, " \
-        "or hear a random motivational quote. You will also receive advice " \
-        "in the case that I hear a statement of self harm."
+                    "Try saying, ASADA help, for help talking to me"
         should_end_session = False
         session_attributes = {
             'lastSpoken' : speech_output
@@ -380,22 +379,23 @@ def sleep_habits():
     
 def eating_habits():
     #retrieve a piece of eating advice for the user
+    global USER_IDENTIFICATION
+    global QUIZSCORE
     card_title = "Eating Habits"
     result = ""
     with conn.cursor() as cur:
-        well_being = calculate_well_being(QUIZSCORE)
+        well_being = calculate_well_being(globals()['QUIZSCORE'])
         severity = severity_calculator(well_being)
-        
-        #cur.execute("select advice from EatingAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
-        #comment or erase below query if above query is present        
-        cur.execute("select advice from EatingAdvice ORDER BY RAND() LIMIT 1")
+
+        #use for backup
+        #cur.execute("select advice from EatingAdvice ORDER BY RAND() LIMIT 1")
+
+        #only works for severity 1
+        cur.execute("select advice from EatingAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
         result = cur.fetchone()
         speech_output = result[0]
         reprompt_text = "I did not understand your command. " \
-        "You can request a well being survey, ask for general advice, " \
-        "ask for more specific advice like eating, sleeping and exercise, " \
-        "or hear a random motivational quote. You will also receive advice " \
-        "in the case that I hear a statement of self harm."
+                    "Try saying, ASADA help, for help talking to me"
         should_end_session = False
         session_attributes = {
             'lastSpoken' : speech_output
@@ -427,10 +427,7 @@ def ask_question(request, speech_output):
                  }
   
     reprompt_text = "I did not understand your command. " \
-        "You can request a well being survey, ask for general advice, " \
-        "ask for more specific advice like eating, sleeping and exercise, " \
-        "or hear a random motivational quote. You will also receive advice " \
-        "in the case that I hear a statement of self harm."
+                    "Try saying, ASADA help, for help talking to me"
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))    
@@ -467,6 +464,7 @@ def answer_quiz(request, intent, session):
     global QUIZSCORE
     global COUNTER
     global STATE
+    global USER_IDENTIFICATION
     
     speech_message = ""
     quiz_question = ""
@@ -485,7 +483,7 @@ def answer_quiz(request, intent, session):
     with conn.cursor() as cursor:
         surveyID = uuid.uuid4()
         now = date.today()
-        sql = "INSERT INTO Survey (SurveyID, SurveyDate, SurveyScore, UserID) VALUES ('{0}', '{1}', '{2}', {3});".format(surveyID, now, QUIZSCORE, '3567')
+        sql = "INSERT INTO Survey (SurveyID, SurveyDate, SurveyScore, UserID) VALUES ('{0}', '{1}', '{2}', {3});".format(surveyID, now, QUIZSCORE, USER_IDENTIFICATION)
         cursor.execute(sql)
     conn.commit()
     
@@ -531,7 +529,7 @@ def on_intent(intent_request, session):
     
         #for key in event.key():
     #    message = message + " " + key
-        
+    global USER_IDENTIFICATION
     write_to_conversation(USER_IDENTIFICATION, 1, intent_name)
     
     if intent_name == "AMAZON.HelpIntent":
