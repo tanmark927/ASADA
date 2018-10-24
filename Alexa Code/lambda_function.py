@@ -16,8 +16,6 @@ name = "asadadepression"
 password = "Dontbesad1"
 db_name = "asadaDB"
 
-#-------variables for survey-------
-
 OPENING_MESSAGE = "This is the Patient Health Questionnaire. " \
                    "It will measure the status of your well-being. " \
                    "You can answer by saying not at all, several days, more than half or nearly everyday. "
@@ -55,7 +53,6 @@ except:
 
 logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
 
-
 # --------------- Helpers that build all of the responses ----------------------
 
 def write_to_conversation(userID, outgoing, message):
@@ -88,14 +85,12 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
         'shouldEndSession': should_end_session
     }
 
-
 def build_response(session_attributes, speechlet_response):
     return {
         'version': '1.0',
         'sessionAttributes': session_attributes,
         'response': speechlet_response
     }
-
 
 ITEMS = []
 ITEMS.append("How often are you bothered with feeling little interest or pleasure in doing things?")
@@ -107,7 +102,6 @@ ITEMS.append("How often are you having bad thoughts about yourself?")
 ITEMS.append("How often have you had trouble concentrating on an activity?")
 ITEMS.append("How often are you bothered with moving or speaking slowly? Or the opposite, feeling fidgety or restless")
 ITEMS.append("How often have you had thoughts that you are better off dead or thought of hurting yourself in some way?")
-
 
 # --------------- Functions that control the skill's behavior ------------------
 
@@ -143,7 +137,6 @@ def on_session_started(session_started_request, session):
     print("on_session_started requestId=" + session_started_request['requestId']
           + ", sessionId=" + session['sessionId'])
 
-
 def on_launch(launch_request, session):
     """ Called when the user launches the skill without specifying what they
     want
@@ -155,15 +148,15 @@ def on_launch(launch_request, session):
 
 def calculate_well_being(score):
     if (score >= 0 and score <= 4):
-        return 5;
+        return 5
     elif (score >= 5 and score <= 9):
-        return 4;
+        return 4
     elif (score >= 10 and score <= 14):
-        return 3;
+        return 3
     elif (score >= 15 and score <= 20):
-        return 2;
+        return 2
     elif score > 20:
-        return 1;
+        return 1
 
 def help_asada():
     global USER_IDENTIFICATION
@@ -256,7 +249,6 @@ def fortune_cookie():
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
 
-
 def user_intro(intent):
     global USER_IDENTIFICATION
     global QUIZSCORE
@@ -297,7 +289,6 @@ def user_intro(intent):
         card_title, speech_output, reprompt_text, should_end_session))
         
 def exercise_habits():
-    #test run to get exercise advice
     global USER_IDENTIFICATION
     global QUIZSCORE
     card_title = "Exercise Habits"
@@ -390,7 +381,9 @@ def eating_habits():
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
+      
 #-----------------------Quiz function---------------#
+
 def ask_question(request, speech_output):
     global QUIZSCORE
     global COUNTER
@@ -487,8 +480,7 @@ def answer_quiz(request, intent, session):
     card_title = "Survey"
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_message, reprompt_text, should_end_session))
-    
-    
+  
 def get_result(score):
     if(score >= 0 and score <= 4):
         return "based on your screening, You should consult with ASADA at least once every two weeks."
@@ -544,7 +536,6 @@ def on_intent(intent_request, session):
     else:
         raise ValueError("Invalid intent")
 
-
 def on_session_ended(session_ended_request, session):
     """ Called when the user ends the session.
 
@@ -554,7 +545,6 @@ def on_session_ended(session_ended_request, session):
           ", sessionId=" + session['sessionId'])
     # closes the applications
     return handle_session_end_request()
-
 
 # --------------- Main handler ------------------
 
@@ -584,4 +574,3 @@ def lambda_handler(event, context):
         return on_intent(event['request'], event['session'])
     elif event['request']['type'] == "SessionEndedRequest":
         return on_session_ended(event['request'], event['session'])
-    
