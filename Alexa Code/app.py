@@ -1,12 +1,12 @@
 import sys
 import logging
-import rds_config
+#import rds_config.py
 import pymysql
 #rds settings
 rds_host  = "asada.cofr9vg9xjlm.us-east-1.rds.amazonaws.com"
-name = rds_config.db_username
-password = rds_config.db_password
-db_name = rds_config.db_name
+name = "asadadepression"
+password = "Dontbesad1"
+db_name = "asadaDB"
 
 
 logger = logging.getLogger()
@@ -27,16 +27,9 @@ def handler(event, context):
     item_count = 0
 
     with conn.cursor() as cur:
-        #cur.execute("create table Employee3 ( EmpID  int NOT NULL, Name varchar(255) NOT NULL, PRIMARY #KEY (EmpID))")  
-        #cur.execute('insert into Employee3 (EmpID, Name) values(1, "Joe")')
-        #cur.execute('insert into Employee3 (EmpID, Name) values(2, "Bob")')
-        #cur.execute('insert into Employee3 (EmpID, Name) values(3, "Mary")')
-        #conn.commit()
-        cur.execute("select * from FortuneCookie")
-        for row in cur:
-            item_count += 1
-            logger.info(row)
-            print(row)
+        cur.execute("select FC_Message from FortuneCookie ORDER BY RAND() LIMIT 1")
+        result = cur.fetchone()
     
 
-    return "Added %d items from RDS MySQL table" %(item_count)
+    return "%s" %(result[0])
+    
