@@ -14,6 +14,8 @@
                 {
                     "name": "AMAZON.HelpIntent",
                     "samples": [
+                        "help me",
+                        "how to asada",
                         "help asada",
                         "asada help",
                         "asada give commands available",
@@ -23,9 +25,10 @@
                 {
                     "name": "AMAZON.StopIntent",
                     "samples": [
+                        "goodbye asada",
                         "sayonara asada",
                         "adios asada",
-                        "bye felicia",
+                        "bye asada",
                         "good bye asada",
                         "leave asada",
                         "close asada",
@@ -60,29 +63,172 @@
                     "name": "AdviceGiver",
                     "slots": [],
                     "samples": [
+                        "feels bad",
+                        "can you help me",
                         "I'm feeling down",
-                        "Please give me advice",
-                        "Can you give me advice",
                         "I need help"
-                    ]
-                },
-                {
-                    "name": "ContinueConvo",
-                    "slots": [],
-                    "samples": [
-                        "keep going",
-                        "what else do you got",
-                        "another one",
-                        "continue"
                     ]
                 },
                 {
                     "name": "DeathAlert",
                     "slots": [],
                     "samples": [
+                        "i'm going to jump off a bridge",
+                        "i'm going to down a lot of pills",
+                        "i want to die",
+                        "kill me",
+                        "please end me",
+                        "my life is not worth living",
+                        "i got myself a knife",
+                        "I am feeling dead",
+                        "dead inside",
+                        "dying",
+                        "Death Alert",
                         "i'm feeling suicidal",
                         "i feel like dying today",
                         "i want to kill myself"
+                    ]
+                },
+                {
+                    "name": "FortuneCookie",
+                    "slots": [],
+                    "samples": [
+                        "crack open a fortune cookie",
+                        "i would like to be motivated",
+                        "provide me with motivation",
+                        "send me a motivational quote",
+                        "give me an advice",
+                        "advice",
+                        "fortune",
+                        "could you give me some advice",
+                        "give me advice",
+                        "Fortune Cookie",
+                        "tell me my fortune",
+                        "give me a fortune cookie"
+                    ]
+                },
+                {
+                    "name": "AnswerIntent",
+                    "slots": [
+                        {
+                            "name": "Answer",
+                            "type": "answers"
+                        }
+                    ],
+                    "samples": [
+                        "{Answer}"
+                    ]
+                },
+                {
+                    "name": "SurveyIntent",
+                    "slots": [],
+                    "samples": [
+                        "i would like to take a survey",
+                        "take a well being survey",
+                        "take a well-being survey",
+                        "Survey Time",
+                        "give me a survey",
+                        "take the survey",
+                        "start the survey",
+                        "take a survey"
+                    ]
+                },
+                {
+                    "name": "SleepHabits",
+                    "slots": [],
+                    "samples": [
+                        "sleep",
+                        "Sleep Habits Time",
+                        "give me some sleeping advice",
+                        "what can i do to sleep better",
+                        "can you give me sleeping advice",
+                        "i have so much on my mind right now",
+                        "could you help me with my sleeping schedule",
+                        "i would like to sleep better",
+                        "i'm having a hard time sleeping",
+                        "i can't sleep"
+                    ]
+                },
+                {
+                    "name": "EatingHabits",
+                    "slots": [],
+                    "samples": [
+                        "eat",
+                        "Eating Habits Time",
+                        "what should i change in my diet",
+                        "give me some eating advice",
+                        "can you give me eating advice",
+                        "what are some healthy eating options",
+                        "i want to be healthy",
+                        "i want to gain weight",
+                        "i want to lose weight"
+                    ]
+                },
+                {
+                    "name": "ExerciseHabits",
+                    "slots": [],
+                    "samples": [
+                        "exercise",
+                        "i want to exercise my back",
+                        "i want some exercise",
+                        "i feel a little groggy",
+                        "i want to exercise my legs",
+                        "i want to exercise my arms",
+                        "what workout should i do",
+                        "give me an exercise or two",
+                        "i would like an exercise",
+                        "could you give me an exercise",
+                        "I want to be up and about",
+                        "I want to move around",
+                        "Exercise Habits"
+                    ]
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "GiveThanks",
+                    "slots": [],
+                    "samples": [
+                        "thanks",
+                        "Thank you"
+                    ]
+                },
+                {
+                    "name": "UserIntroduction",
+                    "slots": [
+                        {
+                            "name": "FirstName",
+                            "type": "AMAZON.US_FIRST_NAME"
+                        }
+                    ],
+                    "samples": [
+                        "Log me in as {FirstName}",
+                        "I am {FirstName}",
+                        "My Name is {FirstName}"
+                    ]
+                },
+                {
+                    "name": "AMAZON.RepeatIntent",
+                    "samples": [
+                        "tell me that one more time",
+                        "say that again",
+                        "could you say that again",
+                        "repeat",
+                        "repeat please",
+                        "repeat that",
+                        "could you repeat that"
+                    ]
+                },
+                {
+                    "name": "FindTherapist",
+                    "slots": [],
+                    "samples": [
+                        "find me a psychologist",
+                        "find psychologist",
+                        "find therapist",
+                        "find me a therapist"
                     ]
                 }
             ],
@@ -96,8 +242,116 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "answers",
+                    "values": [
+                        {
+                            "id": "3",
+                            "name": {
+                                "value": "nearly everyday",
+                                "synonyms": [
+                                    "everyday",
+                                    "seven times a week",
+                                    "six times a week",
+                                    "every day",
+                                    "always",
+                                    "constantly",
+                                    "all the time"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "2",
+                            "name": {
+                                "value": "more than half the days",
+                                "synonyms": [
+                                    "five times a week",
+                                    "four times a week",
+                                    "half the days",
+                                    "more than half",
+                                    "often",
+                                    "most of the time"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "1",
+                            "name": {
+                                "value": "several days",
+                                "synonyms": [
+                                    "some times",
+                                    "three times a week",
+                                    "twice a week",
+                                    "once a week",
+                                    "sometimes",
+                                    "rarely",
+                                    "some of the time"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "0",
+                            "name": {
+                                "value": "not at all",
+                                "synonyms": [
+                                    "not once",
+                                    "zero times a week",
+                                    "never"
+                                ]
+                            }
+                        }
+                    ]
                 }
             ]
-        }
+        },
+        "dialog": {
+            "intents": [
+                {
+                    "name": "UserIntroduction",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "FirstName",
+                            "type": "AMAZON.US_FIRST_NAME",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.867276389095.1016336764626"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "prompts": [
+            {
+                "id": "Elicit.Slot.1421478319679.220109971386",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what is your name?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.867276389095.1016336764626",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please tell me your name."
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "Who are you?"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "What is your name?"
+                    }
+                ]
+            }
+        ]
     }
 }
