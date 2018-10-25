@@ -11,7 +11,7 @@ os.environ["GOOGLE_API_KEY"] = "AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s"
 import geocoder
 import requests
 
-address = '8882 Dakota Ave, Garden Grove, CA'
+address = '1250 Bellflower Blvd, Long Beach, CA 90840'
 
 keyword = "counseling OR therapist OR psychiatrist"
 g = geocoder.google(address, key='AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s')
