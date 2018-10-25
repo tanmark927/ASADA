@@ -6,7 +6,7 @@ Created on Tue Oct 23 15:13:01 2018
 """
 import os
 
-os.environ["GOOGLE_API_KEY"] = "AIzaSyA7Qsam0WsI3_eVExTgdKFdSbmDAQ_j3NM"
+os.environ["GOOGLE_API_KEY"] = "AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s"
 
 import geocoder
 import requests
@@ -14,12 +14,12 @@ import requests
 address = '8882 Dakota Ave, Garden Grove, CA'
 
 keyword = "counseling OR therapist OR psychiatrist"
-g = geocoder.google(address, key='AIzaSyA7Qsam0WsI3_eVExTgdKFdSbmDAQ_j3NM')
+g = geocoder.google(address, key='AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s')
 print(g.latlng)
 latlng = g.latlng
 location = "{},{}".format(latlng[0], latlng[1])
 print(location)
-key = "AIzaSyACC15SxgdpnLrFn9ZHBkbWEuJrZHCEDsI"
+key = "AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s"
 URL2 = "https://maps.googleapis.com/maps/api/place/textsearch/json?location={}&query={}&key={}".format(location,keyword,key)
 print(URL2)
 r2 = requests.get(URL2)
