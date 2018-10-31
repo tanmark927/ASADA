@@ -29,15 +29,7 @@ Mark Tan
 
 Fall Upgrade Todo:
   
-  Aim for Conversation
-  
-  Integrate ML if needed (and which Algorithm LSTM, CNN, DecisionTrees?)
-  
-  Redesign DB and Clean
-  
-  Android Integration to DB (perform later)
+  Process Arbitrary User Responses With No System Crashes
 
-  Survey functionality
-  
-  and more.....
+  Suggest Nearby Places for Therapists/Psychatrists
   
