@@ -230,6 +230,31 @@
                         "find therapist",
                         "find me a therapist"
                     ]
+                },
+                {
+                    "name": "CreateAnAccount",
+                    "slots": [
+                        {
+                            "name": "FirstName",
+                            "type": "AMAZON.US_FIRST_NAME"
+                        }
+                    ],
+                    "samples": [
+                        "give me {FirstName} an account",
+                        "make an account for {FirstName}",
+                        "I {FirstName} would like to make an account",
+                        "I {FirstName} would like to create an account",
+                        "create an account for  {FirstName}"
+                    ]
+                },
+                {
+                    "name": "GetAddress",
+                    "slots": [],
+                    "samples": [
+                        "give me address",
+                        "give me the address",
+                        "take the address"
+                    ]
                 }
             ],
             "types": [
@@ -322,8 +347,25 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "CreateAnAccount",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "FirstName",
+                            "type": "AMAZON.US_FIRST_NAME",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1110198054691.34037250484"
+                            }
+                        }
+                    ]
                 }
-            ]
+            ],
+            "delegationStrategy": "SKILL_RESPONSE"
         },
         "prompts": [
             {
@@ -341,6 +383,27 @@
                     {
                         "type": "PlainText",
                         "value": "Please tell me your name."
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "Who are you?"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "What is your name?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1110198054691.34037250484",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please tell me your name"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "Give me your name."
                     },
                     {
                         "type": "PlainText",
