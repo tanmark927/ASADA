@@ -7,6 +7,8 @@ import math
 import string
 import random
 import uuid
+import geocoder
+import requests
 from datetime import date
 
 #rds settings
@@ -30,7 +32,6 @@ USE_CARDS_FLAG = False
 LAST_SPOKEN = ""
 USER_IDENTIFICATION = 2222
 USER_WELL_BEING = 0
-#TODO: initialize as global in functions
 
 STATE_START = "Start"
 STATE_SURVEY = "Questionnaire"
@@ -76,8 +77,8 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
         },
         'card': {
             'type': 'Simple',
-            'title': "SessionSpeechlet - " + title,
-            'content': "SessionSpeechlet - " + output
+            'title': title,
+            'content':  output
         },
         'reprompt': {
             'outputSpeech': {
@@ -87,6 +88,28 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
         },
         'shouldEndSession': should_end_session
     }
+
+def build_permission_response(output, reprompt_text, should_end_session):
+    return {
+        'outputSpeech': {
+            'type': 'PlainText',
+            'text': output
+        },
+         'card': {
+            'type': 'AskForPermissionsConsent',
+            'title': 'Permission Request',
+            'permissions': ['read::alexa:device:all:address'],
+            'content': output
+        },
+        'reprompt': {
+            'outputSpeech': {
+                'type': 'PlainText',
+                'text': reprompt_text
+            }
+        },
+        'shouldEndSession': should_end_session
+    }
+
 
 
 def build_response(session_attributes, speechlet_response):
@@ -118,8 +141,6 @@ def get_welcome_response():
                     "I will be your personal therapist. " \
                     "If you need help, try saying, " \
                     "ASADA help, for help talking to me"
-    # If the user either does not reply to the welcome message or says something
-    # that is not understood, they will be prompted again with this text.
     reprompt_text = "I will be your personal therapist. " \
                     "Try saying, ASADA help, for help talking to me"
     session_attributes = {
@@ -134,7 +155,6 @@ def handle_session_end_request():
     speech_output = "Thank you for using ASADA. " \
                     "Have a nice day! "
     
-    # Setting this to true ends the session and exits the skill.
     should_end_session = True
     return build_response({}, build_speechlet_response(
         card_title, speech_output, None, should_end_session))
@@ -170,7 +190,6 @@ def calculate_well_being(score):
 
 def help_asada():
     global USER_IDENTIFICATION
-    #help function for asada
     card_title = "help function"
     speech_output = "You can request a well being survey, ask for general advice, " \
                     "ask for more specific advice like eating, sleeping and exercise, " \
@@ -214,7 +233,6 @@ def repeat_command(session):
         card_title, speech_output, reprompt_text, should_end_session))
     
 def death_alert():
-    #emergency suicide alert
     global USER_IDENTIFICATION
     card_title = "911 emergency function"
     speech_output = "I recommend you call 911 or the suicide hotline 1 800 273 8255"
@@ -230,7 +248,6 @@ def death_alert():
 
 def give_thanks():
     global USER_IDENTIFICATION
-    #test run to grab a fortune cookie
     card_title = "Give Thanks"
     speech_output = "You are welcome. You are free to try my other services such as the advice giver for" \
              " eating and sleeping, as well as the fortune cookie."
@@ -245,7 +262,6 @@ def give_thanks():
                 card_title, speech_output, reprompt_text, should_end_session))    
 
 def fortune_cookie():
-    #test run to grab a fortune cookie
     global USER_IDENTIFICATION
     card_title = "Fortune Cookie"
     result = ""
@@ -263,6 +279,39 @@ def fortune_cookie():
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
 
+def createAnAccount(intent):
+    global USER_IDENTIFICATION
+    card_title = "Create An Account"
+    u_name =  intent['slots']['FirstName']['value']
+    with conn.cursor() as cur:
+        try:
+            cur.execute("select UserID from Users where UserName = %s LIMIT 1", [u_name])
+            result = cur.fetchone()
+            
+            ##create random int and turn into string to be added to table
+            id = str(random.randint(1, 1000))
+
+            
+            if(type(result) is not type(None)):
+                speech_output = "User already exists."
+            else:
+                ##insert sql row insert username, id, user identification, assign global var here
+                cur.execute("INSERT into Users (UserID, UserName) VALUES({0}, {1})".format(id, u_name))
+                USER_IDENTIFICATION = int(u_name)
+                speech_output = "You have sucessfully created an account"
+        except ValueError:
+            ##edit speechoutput comment
+            speech_output = "Please restate your name."
+    ##edit reprompt text     
+    reprompt_text = "Please restate your name."
+    should_end_session = False
+    session_attributes = {
+        'lastSpoken' : speech_output
+    }
+    write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
+
 
 def user_intro(intent):
     global USER_IDENTIFICATION
@@ -274,13 +323,23 @@ def user_intro(intent):
         try:
             cur.execute("select UserID from Users where UserName = %s LIMIT 1", [u_name])
             result = cur.fetchone()
-            USER_IDENTIFICATION = result[0]
+            
+            #NOTE: None and type(None) are NOT the same type! type(None) is NoneType,
+            # which can be found in result if result contains zero elements
+            if type(result) is not type(None):
+                USER_IDENTIFICATION = result[0]
             
             cur.execute("select SurveyScore from Survey where UserID = %s order by SurveyDate desc limit 1", [USER_IDENTIFICATION])
             result_two = cur.fetchone()
-            QUIZSCORE = result_two[0]
+            if type(result_two) is not type(None):
+                QUIZSCORE = result_two[0]
             
-            speech_output = "Welcome " + u_name + " to ASADA."
+            if(type(result) is not type(None) and type(result_two) is not type(None)):
+                speech_output = "Welcome " + u_name + " to ASADA."
+            elif(type(result) is not type(None) and type(result_two) is type(None)):
+                speech_output = "Welcome " + u_name + " to ASADA. Please take a survey so that I can better target your needs."
+            else:
+                speech_output = "Please register your name."
         except ValueError:
             speech_output = "Excuse me but who are you?"
         
@@ -293,8 +352,6 @@ def user_intro(intent):
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
         
-   
-
 def exercise_habits():
     #test run to get exercise advice
     global USER_IDENTIFICATION
@@ -309,19 +366,15 @@ def exercise_habits():
 
         if 'arms' in first_result:
             cur.execute("select FA_Description from FitnessActivity where FA_Category = 'arms' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
-            #cur.execute("select FA_Description from FitnessActivity where FA_Category = 'arms' ORDER BY RAND() LIMIT 1")
             result = cur.fetchone()
         elif 'legs' in first_result:
             cur.execute("select FA_Description from FitnessActivity where FA_Category = 'legs' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
-            #cur.execute("select FA_Description from FitnessActivity where FA_Category = 'legs' ORDER BY RAND() LIMIT 1")
             result = cur.fetchone()
         elif 'chest' in first_result:
             cur.execute("select FA_Description from FitnessActivity where FA_Category = 'chest' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
-            #cur.execute("select FA_Description from FitnessActivity where FA_Category = 'chest' ORDER BY RAND() LIMIT 1")
             result = cur.fetchone()
         elif 'back' in first_result:
             cur.execute("select FA_Description from FitnessActivity where FA_Category = 'back' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
-            #cur.execute("select FA_Description from FitnessActivity where FA_Category = 'back' ORDER BY RAND() LIMIT 1")
             result = cur.fetchone()
         else:
             #execute this query if user command does not specify area of exercise
@@ -351,7 +404,6 @@ def severity_calculator(well_being_score):
         return 5
 
 def sleep_habits():
-    #retrieve a piece of sleep advice for the user
     global USER_IDENTIFICATION
     global QUIZSCORE
     card_title = "Sleep Habits"
@@ -360,10 +412,6 @@ def sleep_habits():
         well_being = calculate_well_being(globals()['QUIZSCORE'])
         severity = severity_calculator(well_being)
 
-        #use as backup
-        #cur.execute("select advice from SleepAdvice ORDER BY RAND() LIMIT 1")
-
-        #only works for severity 1 at the moment
         cur.execute("select advice from SleepAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
         result = cur.fetchone()
         speech_output = result[0]
@@ -378,7 +426,6 @@ def sleep_habits():
             card_title, speech_output, reprompt_text, should_end_session))
     
 def eating_habits():
-    #retrieve a piece of eating advice for the user
     global USER_IDENTIFICATION
     global QUIZSCORE
     card_title = "Eating Habits"
@@ -387,10 +434,6 @@ def eating_habits():
         well_being = calculate_well_being(globals()['QUIZSCORE'])
         severity = severity_calculator(well_being)
 
-        #use for backup
-        #cur.execute("select advice from EatingAdvice ORDER BY RAND() LIMIT 1")
-
-        #only works for severity 1
         cur.execute("select advice from EatingAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
         result = cur.fetchone()
         speech_output = result[0]
@@ -415,7 +458,7 @@ def ask_question(request, speech_output):
     
     globals()['COUNTER'] += 1
 
-    quiz_question = str(ITEMS[COUNTER - 1]) #TODO: Create method
+    quiz_question = str(ITEMS[COUNTER - 1])
     speech_output += quiz_question
     card_title = "Question" + str(COUNTER)
     session_attributes = {"quizscore":globals()['QUIZSCORE'],
@@ -436,8 +479,6 @@ def do_quiz(request):
     global QUIZSCORE
     global COUNTER
     global STATE
-    
-    
     
     COUNTER = 0
     QUIZSCORE = 0
@@ -517,8 +558,60 @@ def get_result(score):
     elif(score > 20):
         return "based on your screening, You should consult your doctor about your condition. There are lots of treatment options, " \
         "and getting onto it as soon as possible could bring your life back. It is recommended to take the survey every two weeks."
-         
-def on_intent(intent_request, session):
+
+def get_address(context):
+    deviceId = context['context']['System']['device']['deviceId']
+    print(deviceId)
+    """This functions gets the location of the User's Alexa device, if they have granted location permissions. """
+    URL = "https://api.amazonalexa.com/v1/devices/{}/settings/address".format(deviceId)
+    TOKEN = context['context']['System']['apiAccessToken']
+    HEADER = {'Accept': "application/json",'Authorization': "Bearer {}".format(TOKEN)}
+    print(HEADER)
+    print(TOKEN)
+    print(URL)
+    r = requests.get(URL, headers=HEADER)
+    print(r.status_code)
+    if(r.status_code == 200):
+        alexa_location = r.json()
+        print("aaaaa",alexa_location)
+        address = "{} {}".format(alexa_location["addressLine1"],
+                             alexa_location["city"])
+    elif(r.status_code == 403):
+        speech_output = "Please go to the Alexa app, and allow the permissions for this skill to request your address"
+        reprompt_text = "Please go to the Alexa app, and allow the permissions for this skill to request your address"
+        should_end_session = False;
+        build_response(session_attributes, build_permission_response(speech_output, reprompt_text, should_end_session))
+    keyword = "(therapist OR psychiatrist) AND MD"
+    g = geocoder.google(address, key='AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s')
+    print("it stops here")
+    print(g.latlng)
+    latlng = g.latlng
+    location = "{},{}".format(latlng[0], latlng[1])
+    print(location)
+    key = "AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s"
+    URL2 = "https://maps.googleapis.com/maps/api/place/textsearch/json?location={}&query={}&key={}".format(location,keyword,key)
+    print(URL2)
+    r2 = requests.get(URL2)
+    if r2.status_code == 200:
+        first_output = r2.json()
+    else:
+        print("Sorry, I'm having trouble doing that right now. Please try again later.")
+    #print(first_output)
+    print("////////////////////////////////////////////////////////////////")
+    address = first_output['results'][0]['formatted_address']
+    speech_output = address
+    session_attributes = {
+        'lastSpoken' : speech_output
+    }
+    card_title = "address function"
+    reprompt_text = "I did not understand your command. " \
+                    "Try saying, ASADA help, for help talking to me"
+    should_end_session = False
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
+   
+
+def on_intent(intent_request, session, context):
     """ Called when the user specifies an intent for this skill """
 
     print("on_intent requestId=" + intent_request['requestId'] +
@@ -554,8 +647,12 @@ def on_intent(intent_request, session):
         return give_thanks()
     elif intent_name == "UserIntroduction":
         return user_intro(intent)
+    elif intent_name == "GetAddress":
+        return get_address(context)
     elif intent_name == "AMAZON.RepeatIntent":
         return repeat_command(session)
+    elif intent_name == "CreateAnAccount":
+        return createAnAccount(intent)
     else:
         raise ValueError("Invalid intent")
 
@@ -580,7 +677,6 @@ def lambda_handler(event, context):
     
     print("event.session.application.applicationId=" +
           event['session']['application']['applicationId'])
-
     """
     Uncomment this if statement and populate with your skill's application ID to
     prevent someone else from configuring a skill that sends requests to this
@@ -596,7 +692,7 @@ def lambda_handler(event, context):
     if event['request']['type'] == "LaunchRequest":
         return on_launch(event['request'], event['session'])
     elif event['request']['type'] == "IntentRequest":
-        return on_intent(event['request'], event['session'])
+        return on_intent(event['request'], event['session'], event)
     elif event['request']['type'] == "SessionEndedRequest":
         return on_session_ended(event['request'], event['session'])
     
