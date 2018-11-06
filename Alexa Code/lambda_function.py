@@ -33,7 +33,7 @@ USE_CARDS_FLAG = False
 LAST_SPOKEN = ""
 USER_IDENTIFICATION = 2222
 USER_WELL_BEING = 0
-SURVEY_THERAPIST = ""
+#SURVEY_THERAPIST = ""
 
 STATE_START = "Start"
 STATE_SURVEY = "Questionnaire"
@@ -505,7 +505,7 @@ def answer_quiz(request, intent, session, context):
     global COUNTER
     global STATE
     global USER_IDENTIFICATION
-    global SURVEY_THERAPIST
+    #global SURVEY_THERAPIST
 
     speech_message = ""
     quiz_question = ""
@@ -521,10 +521,10 @@ def answer_quiz(request, intent, session, context):
         return ask_question(request, "")
     speech_message += get_result(QUIZSCORE)
     
-    if QUIZSCORE > 20:
-        ft_response = find_therapist(context)
-        print(ft_response)
-        speech_message += " " + SURVEY_THERAPIST
+    #if QUIZSCORE > 20:
+    #    ft_response = find_therapist(context)
+    #    print(ft_response)
+    #    speech_message += " " + SURVEY_THERAPIST
     
     with conn.cursor() as cursor:
         surveyID = uuid.uuid4()
@@ -561,10 +561,10 @@ def get_result(score):
         return "based on your screening, you should consult with ASADA once a day." \
         "It is recommended to seek professional help. It is recommended to take the survey every two weeks."
     elif(score > 20):
-        return "based on your screening, you should consult a therapist about your recent experiences and take the survey once a week. "
+        return "based on your screening, you should consult a therapist about your recent experiences and take the survey once a week. We recommend you use the Find Therapist feature of ASADA."
 
 def find_therapist(context):
-    global SURVEY_THERAPIST
+    #global SURVEY_THERAPIST
     deviceId = context['context']['System']['device']['deviceId']
     print(deviceId)
     """This functions gets the location of the User's Alexa device, if they have granted location permissions. """
@@ -604,7 +604,7 @@ def find_therapist(context):
         doc_place = first_output['results'][0]['name']
         address = first_output['results'][0]['formatted_address']
         speech_output = "I have found a possible therapist for you. It is {}. This person is located at {}".format(doc_place, address)
-        globals()['SURVEY_THERAPIST'] = speech_output
+        #globals()['SURVEY_THERAPIST'] = speech_output
     else:
         print("Sorry, I'm having trouble doing that right now. Please try again later.")
     #print(first_output)
