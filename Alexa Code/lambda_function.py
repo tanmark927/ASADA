@@ -70,6 +70,7 @@ def write_to_conversation(userID, outgoing, message):
         cursor.execute(sql)
     conn.commit()
 
+#regular speechlet response builder for Alexa Skill Kit
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
     return {
         'outputSpeech': {
@@ -89,7 +90,7 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
         },
         'shouldEndSession': should_end_session
     }
-
+#fetching permission json card builder for Alexa Skills Kit
 def build_permission_response(output, reprompt_text, should_end_session):
     return {
         'outputSpeech': {
@@ -120,7 +121,7 @@ def build_response(session_attributes, speechlet_response):
         'response': speechlet_response
     }
 
-
+#depression survey function
 ITEMS = []
 ITEMS.append("How often do you feel little interest or pleasure in doing things?")
 ITEMS.append("How often do you feel down, depressed or hopeless?")
@@ -446,6 +447,8 @@ def eating_habits():
             card_title, speech_output, reprompt_text, should_end_session))
 
 #-----------------------Quiz function---------------#
+
+#returns the question for the survey
 def ask_question(request, speech_output):
     global QUIZSCORE
     global COUNTER
@@ -456,10 +459,11 @@ def ask_question(request, speech_output):
         speech_output += OPENING_MESSAGE
     
     globals()['COUNTER'] += 1
-
+    #fetch question from table depending on the counter of the survey
     quiz_question = str(ITEMS[COUNTER - 1])
     speech_output += quiz_question
     card_title = "Question" + str(COUNTER)
+    #creates the session attributes for the survey
     session_attributes = {"quizscore":globals()['QUIZSCORE'],
                   "quizproperty":quiz_question,
                   "response":speech_output,
@@ -474,6 +478,7 @@ def ask_question(request, speech_output):
     return build_response(session_attributes, build_speechlet_response(
     	card_title, speech_output, reprompt_text, should_end_session))    
 
+#starts the survey, sets the global variables to set into the session attributes
 def do_quiz(request):
     global QUIZSCORE
     global COUNTER
@@ -484,6 +489,9 @@ def do_quiz(request):
     STATE = STATE_SURVEY
     return ask_question(request, "")
 
+#pre-process the answer, checks if the user is in the survey state.
+#returns a question if the user is in the state
+#returns a statement saying the user is not in the state
 def answer(request, intent, session, context):
     global STATE
     
@@ -499,7 +507,8 @@ def answer(request, intent, session, context):
     }
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
-    
+
+#processes the survey score, depending on the response.
 def answer_quiz(request, intent, session, context):
     global QUIZSCORE
     global COUNTER
@@ -511,7 +520,7 @@ def answer_quiz(request, intent, session, context):
     quiz_question = ""
     
     #check if first question, and put welcome message?
-    
+    #processes the user's answers, getting the id of the response.
     if session['attributes'] and session['attributes']['quizscore'] != None:
         QUIZSCORE = session['attributes']['quizscore']
     if 'Answer' in intent['slots']:
@@ -525,7 +534,7 @@ def answer_quiz(request, intent, session, context):
     #    ft_response = find_therapist(context)
     #    print(ft_response)
     #    speech_message += " " + SURVEY_THERAPIST
-    
+    #saves to database
     with conn.cursor() as cursor:
         surveyID = uuid.uuid4()
         now = date.today()
@@ -549,7 +558,7 @@ def answer_quiz(request, intent, session, context):
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_message, reprompt_text, should_end_session))
     
-    
+#returns the results, consulting on how many times the user should use ASADA    
 def get_result(score):
     if(score >= 0 and score <= 4):
         return "based on your screening, you should consult with ASADA at least once every two weeks."
@@ -563,6 +572,9 @@ def get_result(score):
     elif(score > 20):
         return "based on your screening, you should consult a therapist about your recent experiences and take the survey once a week. We recommend you use the Find Therapist feature of ASADA."
 
+#finds a therapist depending on the user's address. 
+#finds the nearest therapist, depending on the user's device address inside. 
+#returns a permission request if the user have not given permission
 def find_therapist(context):
     #global SURVEY_THERAPIST
     deviceId = context['context']['System']['device']['deviceId']
@@ -574,13 +586,17 @@ def find_therapist(context):
     print(HEADER)
     print(TOKEN)
     print(URL)
+    #requests the user address from Alexa skills
     r = requests.get(URL, headers=HEADER)
     print(r.status_code)
     if(r.status_code == 200):
+        #fetches the response as a json
         alexa_location = r.json()
         print("aaaaa",alexa_location)
+        #the address taken from the json
         address = "{} {}".format(alexa_location["addressLine1"],
                              alexa_location["city"])
+    #checks status code
     if(r.status_code == 403):
         speech_output = "Please go to the Alexa app on your smartphone, and allow the permissions for this skill to request your address"
         reprompt_text = "Please go to the Alexa app on your smartphone, and allow the permissions for this skill to request your address"
@@ -590,15 +606,16 @@ def find_therapist(context):
         }
         return build_response(session_attributes, build_permission_response(speech_output, reprompt_text, should_end_session))
     keyword = "(therapist OR psychiatrist) AND MD"
+    #finds the lattitude and longitude of the user's address
     g = geocoder.google(address, key='AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s')
-    print(g.latlng)
     latlng = g.latlng
     location = "{},{}".format(latlng[0], latlng[1])
-    print(location)
     key = "AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s"
+    #set up URL for google's api call
     URL2 = "https://maps.googleapis.com/maps/api/place/textsearch/json?location={}&query={}&key={}".format(location,keyword,key)
-    print(URL2)
+    #sends the http request to google's server
     r2 = requests.get(URL2)
+    #checks the status code
     if r2.status_code == 200:
         first_output = r2.json()
         doc_place = first_output['results'][0]['name']
@@ -607,8 +624,6 @@ def find_therapist(context):
         #globals()['SURVEY_THERAPIST'] = speech_output
     else:
         print("Sorry, I'm having trouble doing that right now. Please try again later.")
-    #print(first_output)
-    print("////////////////////////////////////////////////////////////////")
     
     session_attributes = {
         'lastSpoken' : speech_output
