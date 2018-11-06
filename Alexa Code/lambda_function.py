@@ -185,6 +185,9 @@ def calculate_well_being(score):
     elif score > 20:
         return 1;
 
+'''
+Calling this function returns a statement of a list of tasks to try out
+'''
 def help_asada():
     global USER_IDENTIFICATION
     card_title = "help function"
@@ -202,6 +205,9 @@ def help_asada():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
         
+'''
+Allows you to repeat what was last spoken by ASADA
+'''
 def repeat_command(session):
     global LAST_SPOKEN    
 
@@ -228,7 +234,12 @@ def repeat_command(session):
         }
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
-    
+
+'''
+EMERGENCY this is not a drill sort of scenario.  If the person causes this
+intent to activate, then it will recommend calling 911 or the suicide
+hotline
+'''
 def death_alert():
     global USER_IDENTIFICATION
     card_title = "911 emergency function"
@@ -243,12 +254,14 @@ def death_alert():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
+'''
+When someone says thank you say you are welcome!
+'''
 def give_thanks():
     global USER_IDENTIFICATION
     card_title = "Give Thanks"
-    speech_output = "You are welcome. You are free to try my other services such as the advice giver for" \
-             " eating and sleeping, as well as the fortune cookie."
-    reprompt_text = "I did not understand your command. " \
+    speech_output = "You are welcome."
+    reprompt_text = "I am sorry I did not understand" \
                     "Try saying, ASADA help, for help talking to me"
     should_end_session = False
     session_attributes = {
@@ -258,6 +271,9 @@ def give_thanks():
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))    
 
+'''
+Returns a random fortune for you
+'''
 def fortune_cookie():
     global USER_IDENTIFICATION
     card_title = "Fortune Cookie"
@@ -620,6 +636,9 @@ def find_therapist(context):
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
    
+'''
+Looking for an intent that and determining which intent to utilize
+'''
 def on_intent(intent_request, session, context):
     """ Called when the user specifies an intent for this skill """
 
@@ -663,7 +682,9 @@ def on_intent(intent_request, session, context):
     else:
         return help_asada()
 
-
+'''
+Session is called to end the program.
+'''
 def on_session_ended(session_ended_request, session):
     """ Called when the user ends the session.
 
