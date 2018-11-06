@@ -200,13 +200,19 @@
                     "slots": [
                         {
                             "name": "FirstName",
-                            "type": "AMAZON.US_FIRST_NAME"
+                            "type": "AMAZON.US_FIRST_NAME",
+                            "samples": [
+                                "My name is {FirstName}",
+                                "I am {FirstName}",
+                                "{FirstName}"
+                            ]
                         }
                     ],
                     "samples": [
-                        "Log me in as {FirstName}",
-                        "I am {FirstName}",
-                        "My Name is {FirstName}"
+                        "log {FirstName} in",
+                        "sign {FirstName} in",
+                        "sign me in as {FirstName}",
+                        "log me in as {FirstName}"
                     ]
                 },
                 {
@@ -225,6 +231,10 @@
                     "name": "FindTherapist",
                     "slots": [],
                     "samples": [
+                        "find the closest psychologist",
+                        "find the closest therapist",
+                        "locate psychologist",
+                        "locate therapist",
                         "find me a psychologist",
                         "find psychologist",
                         "find therapist",
@@ -236,24 +246,34 @@
                     "slots": [
                         {
                             "name": "FirstName",
-                            "type": "AMAZON.US_FIRST_NAME"
+                            "type": "AMAZON.US_FIRST_NAME",
+                            "samples": [
+                                "I am {FirstName}",
+                                "My name is {FirstName}",
+                                "{FirstName}"
+                            ]
                         }
                     ],
                     "samples": [
-                        "give me {FirstName} an account",
+                        "this is {FirstName} and I would like to create an account",
+                        "this is {FirstName} and I would like to make an account",
                         "make an account for {FirstName}",
-                        "I {FirstName} would like to make an account",
-                        "I {FirstName} would like to create an account",
-                        "create an account for  {FirstName}"
+                        "create an account for {FirstName}"
                     ]
                 },
                 {
-                    "name": "GetAddress",
+                    "name": "SurveyTracker",
                     "slots": [],
                     "samples": [
-                        "give me address",
-                        "give me the address",
-                        "take the address"
+                        "what is my survey progression",
+                        "show me my survey progression",
+                        "how am i progressing on my surveys",
+                        "track my survey progress",
+                        "tell me about my survey progress",
+                        "remind me about my surveys",
+                        "update me on my surveys",
+                        "how have i progressed with my surveys",
+                        "initiate survey tracker"
                     ]
                 }
             ],
@@ -364,8 +384,7 @@
                         }
                     ]
                 }
-            ],
-            "delegationStrategy": "SKILL_RESPONSE"
+            ]
         },
         "prompts": [
             {
