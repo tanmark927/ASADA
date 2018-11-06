@@ -241,6 +241,7 @@ def repeat_command(session):
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
     
+#Recommend phone numbers that can help the user with serious issues    
 def death_alert():
     global USER_IDENTIFICATION
     card_title = "911 emergency function"
@@ -548,7 +549,6 @@ def answer_quiz(request, intent, session, context):
     global COUNTER
     global STATE
     global USER_IDENTIFICATION
-    #global SURVEY_THERAPIST
 
     speech_message = ""
     quiz_question = ""
@@ -564,10 +564,6 @@ def answer_quiz(request, intent, session, context):
         return ask_question(request, "")
     speech_message += get_result(QUIZSCORE)
     
-    #if QUIZSCORE > 20:
-    #    ft_response = find_therapist(context)
-    #    print(ft_response)
-    #    speech_message += " " + SURVEY_THERAPIST
     #saves to database
     with conn.cursor() as cursor:
         surveyID = uuid.uuid4()
@@ -655,7 +651,6 @@ def find_therapist(context):
         doc_place = first_output['results'][0]['name']
         address = first_output['results'][0]['formatted_address']
         speech_output = "I have found a possible therapist for you. It is {}. This person is located at {}".format(doc_place, address)
-        #globals()['SURVEY_THERAPIST'] = speech_output
     else:
         print("Sorry, I'm having trouble doing that right now. Please try again later.")
     
