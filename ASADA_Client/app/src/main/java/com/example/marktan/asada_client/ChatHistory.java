@@ -258,7 +258,7 @@ class ResponseClass {
 
 interface MyInterface {
     @LambdaFunction
-        Response2 ASADA(RequestClass request);
+        ResponseClass ASADA(RequestClass request);
 }
 
 public class ChatHistory extends AppCompatActivity {
@@ -275,7 +275,7 @@ public class ChatHistory extends AppCompatActivity {
         //mMessageRecycler.setLayoutManager(new LinearLayoutManager(this));
         CognitoCachingCredentialsProvider cognitoProvider = new CognitoCachingCredentialsProvider(
                 getApplicationContext(),
-                "us-east-1:7f35985f-7d00-4360-a233-619f9c547a8f", // Identity pool ID
+                "us-east-1:e3c204de-26f2-4616-b3a3-2d0a429f4d14", // Identity pool ID
                 Regions.US_EAST_1 // Region
         );
 
@@ -287,11 +287,11 @@ public class ChatHistory extends AppCompatActivity {
 
         final MyInterface myInterface = factory.build(MyInterface.class);
 
-        RequestClass request = new RequestClass("LaunchRequest");
+        RequestClass request = new RequestClass("FortuneCookie");
 
-        new AsyncTask<RequestClass, Void, Response2>() {
+        new AsyncTask<RequestClass, Void, ResponseClass>() {
             @Override
-            protected Response2 doInBackground(RequestClass... params) {
+            protected ResponseClass doInBackground(RequestClass... params) {
                 // invoke "echo" method. In case it fails, it will throw a
                 // LambdaFunctionException.
                 try {
@@ -306,7 +306,7 @@ public class ChatHistory extends AppCompatActivity {
             }
 
             @Override
-            protected void onPostExecute(Response2 result) {
+            protected void onPostExecute(ResponseClass result) {
                 if (result == null) {
                     return;
                 }
@@ -316,7 +316,7 @@ public class ChatHistory extends AppCompatActivity {
                 // print each into a chat bubble
 
                 // Do a toast
-                Toast.makeText(ChatHistory.this, result.getResp().getOutput().getSpeechtext(), Toast.LENGTH_LONG).show();
+                Toast.makeText(ChatHistory.this, result.getCookie(), Toast.LENGTH_LONG).show();
             }
         }.execute(request);
 

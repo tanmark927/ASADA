@@ -33,7 +33,6 @@ USE_CARDS_FLAG = False
 LAST_SPOKEN = ""
 USER_IDENTIFICATION = 2222
 USER_WELL_BEING = 0
-#SURVEY_THERAPIST = ""
 
 STATE_START = "Start"
 STATE_SURVEY = "Questionnaire"
@@ -276,12 +275,12 @@ def fortune_cookie():
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
-
+ 
 def createAnAccount(intent):
     global USER_IDENTIFICATION
     card_title = "Create An Account"
     u_name =  intent['slots']['FirstName']['value']
-    
+
     with conn.cursor() as cur:
         try:
             cur.execute("select UserID from Users where UserName = %s LIMIT 1", [u_name])
@@ -445,6 +444,7 @@ def eating_habits():
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
+
 #-----------------------Quiz function---------------#
 def ask_question(request, speech_output):
     global QUIZSCORE
@@ -472,7 +472,7 @@ def ask_question(request, speech_output):
                     "Try saying, ASADA help, for help talking to me"
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
-                card_title, speech_output, reprompt_text, should_end_session))    
+    	card_title, speech_output, reprompt_text, should_end_session))    
 
 def do_quiz(request):
     global QUIZSCORE
@@ -620,7 +620,6 @@ def find_therapist(context):
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
    
-
 def on_intent(intent_request, session, context):
     """ Called when the user specifies an intent for this skill """
 
