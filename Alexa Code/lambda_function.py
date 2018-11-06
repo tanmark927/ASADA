@@ -173,6 +173,7 @@ def on_launch(launch_request, session):
     # Dispatch to your skill's launch
     return get_welcome_response()
 
+#Convert actual quiz score to overall well-being
 def calculate_well_being(score):
     if (score >= 0 and score <= 4):
         return 5;
@@ -276,6 +277,7 @@ def fortune_cookie():
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
  
+#Allows a user to create an account for ASADA
 def createAnAccount(intent):
     global USER_IDENTIFICATION
     card_title = "Create An Account"
@@ -283,24 +285,24 @@ def createAnAccount(intent):
 
     with conn.cursor() as cur:
         try:
+            #Check if username already exists in the database
             cur.execute("select UserID from Users where UserName = %s LIMIT 1", [u_name])
             result = cur.fetchone()
             
-            ##create random int and turn into string to be added to table
+            #Generate random number for the user ID
             id = str(random.randint(1, 1000))
 
-            
             if(type(result) is not type(None)):
                 speech_output = "User already exists."
             else:
-                ##insert sql row insert username, id, user identification, assign global var here
+                #Insert new user info into database
                 cur.execute("INSERT into Users (UserID, UserName) VALUES('{0}', '{1}')".format(id, u_name))
                 USER_IDENTIFICATION = int(u_name)
                 speech_output = "You have sucessfully created an account"
         except ValueError:
-            ##edit speechoutput comment
+            #Prompt user to restate one's name
             speech_output = "Please restate your name."
-    ##edit reprompt text     
+    #Prompt user to restate one's name    
     reprompt_text = "Please restate your name."
     should_end_session = False
     session_attributes = {
@@ -310,33 +312,41 @@ def createAnAccount(intent):
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
-
+#Allows user to sign into ASADA
 def user_intro(intent):
     global USER_IDENTIFICATION
     global QUIZSCORE
     card_title = "User Introduction"
+
+    #Retrieve username from user's last response
     u_name =  intent['slots']['FirstName']['value']
 
     with conn.cursor() as cur:
         try:
+            #Check if user already exists in the database
             cur.execute("select UserID from Users where UserName = %s LIMIT 1", [u_name])
             result = cur.fetchone()
             
-            #NOTE: None and type(None) are NOT the same type! type(None) is NoneType,
-            # which can be found in result if result contains zero elements
+            #Assign user ID to global variable if it exists
             if type(result) is not type(None):
                 USER_IDENTIFICATION = result[0]
             
+            #Check if user has taken a survey
             cur.execute("select SurveyScore from Survey where UserID = %s order by SurveyDate desc limit 1", [USER_IDENTIFICATION])
             result_two = cur.fetchone()
+
+            #Assign user's recent survey score to global variable if it exists
             if type(result_two) is not type(None):
                 QUIZSCORE = result_two[0]
             
             if(type(result) is not type(None) and type(result_two) is not type(None)):
+                #User has an account and has taken a survey
                 speech_output = "Welcome " + u_name + " to ASADA."
             elif(type(result) is not type(None) and type(result_two) is type(None)):
+                #User has an account and has not taken a survey
                 speech_output = "Welcome " + u_name + " to ASADA. Please take a survey so that I can better target your needs."
             else:
+                #User has yet to make an account
                 speech_output = "Please register your name."
         except ValueError:
             speech_output = "Excuse me but who are you?"
@@ -349,19 +359,21 @@ def user_intro(intent):
     write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
-        
+
+#Retrieve a piece of exercise advice depending on a user's well-being
 def exercise_habits():
-    #test run to get exercise advice
     global USER_IDENTIFICATION
     global QUIZSCORE
     card_title = "Exercise Habits"
     result = ""
     exercise_intensity = 0
     with conn.cursor() as cur:
+        #Get most recent user input
         cur.execute("select * from Conversation order by conversationID desc limit 1;")
         first_result = cur.fetchone()
         well_being = calculate_well_being(globals()['QUIZSCORE'])
 
+        #Retrieve advice based on user input and user intensity
         if 'arms' in first_result:
             cur.execute("select FA_Description from FitnessActivity where FA_Category = 'arms' and FA_Intensity = %s ORDER BY RAND() LIMIT 1", [well_being])
             result = cur.fetchone()
@@ -389,6 +401,7 @@ def exercise_habits():
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
 
+#Convert well-being score into severity for advice
 def severity_calculator(well_being_score):
     if well_being_score == 5:
         return 1
@@ -401,15 +414,18 @@ def severity_calculator(well_being_score):
     elif well_being_score == 1:
         return 5
 
+#Retrieve a piece of sleeping advice depending on a user's well-being
 def sleep_habits():
     global USER_IDENTIFICATION
     global QUIZSCORE
     card_title = "Sleep Habits"
     result = ""
     with conn.cursor() as cur:
+        #Convert quiz score to severity
         well_being = calculate_well_being(globals()['QUIZSCORE'])
         severity = severity_calculator(well_being)
 
+        #Retrieve a random piece of sleeping advice
         cur.execute("select advice from SleepAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
         result = cur.fetchone()
         speech_output = result[0]
@@ -423,15 +439,18 @@ def sleep_habits():
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
     
+#Retrieve a piece of eating advice based on a user's well-being
 def eating_habits():
     global USER_IDENTIFICATION
     global QUIZSCORE
     card_title = "Eating Habits"
     result = ""
     with conn.cursor() as cur:
+        #Convert quiz score to severity
         well_being = calculate_well_being(globals()['QUIZSCORE'])
         severity = severity_calculator(well_being)
 
+        #Retrieve a random piece of eating advice
         cur.execute("select advice from EatingAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
         result = cur.fetchone()
         speech_output = result[0]
