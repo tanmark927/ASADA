@@ -9,6 +9,7 @@ import random
 import uuid
 import geocoder
 import requests
+import json
 from datetime import date
 
 #rds settings
@@ -21,10 +22,10 @@ db_name = "asadaDB"
 
 OPENING_MESSAGE = "This is the Patient Health Questionnaire. " \
                    "It will measure the status of your well-being. " \
-                   "You can answer by saying not at all, several days, more than half or nearly everyday. "
+                   "You can answer by saying never, sometimes, often or always. "
 
 SKILL_TITLE = "Patient Health Questionnaire"
-BEGIN_STATEMENT = "You will be asked 9 questions about problems you have faced in the past two weeks. "
+BEGIN_STATEMENT = "You will be asked 9 questions about recent problems you have faced. "
 END_STATEMENT = "Thank you for completing the Patient Health Questionnaire. "
 
 USE_CARDS_FLAG = False
@@ -121,28 +122,24 @@ def build_response(session_attributes, speechlet_response):
 
 
 ITEMS = []
-ITEMS.append("How often are you bothered with feeling little interest or pleasure in doing things?")
-ITEMS.append("How often are you bothered with feeling down, depresed or hopelessness?")
+ITEMS.append("How often do you feel little interest or pleasure in doing things?")
+ITEMS.append("How often do you feel down, depressed or hopeless?")
 ITEMS.append("How often do you have trouble falling asleep, staying asleep, or sleeping too much?")
-ITEMS.append("How often are you feeling tired or having little energy for activities?")
+ITEMS.append("How often do you feel tired or have little energy for activities?")
 ITEMS.append("How often are you bothered with a poor appetite or overeating?")
-ITEMS.append("How often are you having bad thoughts about yourself?")
+ITEMS.append("How often do you have bad thoughts about yourself?")
 ITEMS.append("How often have you had trouble concentrating on an activity?")
-ITEMS.append("How often are you bothered with moving or speaking slowly? Or the opposite, feeling fidgety or restless")
-ITEMS.append("How often have you had thoughts that you are better off dead or thought of hurting yourself in some way?")
-
+ITEMS.append("How often are you bothered with moving and speaking slowly or feeling fidgety and restless?")
+ITEMS.append("How often have you had thoughts of hurting yourself in some way?")
 
 # --------------- Functions that control the skill's behavior ------------------
 
 def get_welcome_response():
     card_title = "Welcome"
-    speech_output = "Hello. " \
-                    "Welcome to ASADA. " \
-                    "I will be your personal therapist. " \
+    speech_output = "Welcome to ASADA. " \
                     "If you need help, try saying, " \
                     "ASADA help, for help talking to me"
-    reprompt_text = "I will be your personal therapist. " \
-                    "Try saying, ASADA help, for help talking to me"
+    reprompt_text = "Again, try saying, ASADA help, if you need additional assistance"
     session_attributes = {
         'lastSpoken' : speech_output
     }
@@ -192,7 +189,7 @@ def help_asada():
     global USER_IDENTIFICATION
     card_title = "help function"
     speech_output = "You can request a well being survey, ask for general advice, " \
-                    "ask for more specific advice like eating, sleeping and exercise, " \
+                    "ask specific advice like eating, sleeping and exercise, find a local therapist, " \
                     "or hear a random motivational quote. You will also receive advice " \
                     "in the case that I hear a statement of self harm."
     reprompt_text = "I did not understand your command. " \
@@ -278,11 +275,12 @@ def fortune_cookie():
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
-
+ 
 def createAnAccount(intent):
     global USER_IDENTIFICATION
     card_title = "Create An Account"
     u_name =  intent['slots']['FirstName']['value']
+
     with conn.cursor() as cur:
         try:
             cur.execute("select UserID from Users where UserName = %s LIMIT 1", [u_name])
@@ -296,7 +294,7 @@ def createAnAccount(intent):
                 speech_output = "User already exists."
             else:
                 ##insert sql row insert username, id, user identification, assign global var here
-                cur.execute("INSERT into Users (UserID, UserName) VALUES({0}, {1})".format(id, u_name))
+                cur.execute("INSERT into Users (UserID, UserName) VALUES('{0}', '{1}')".format(id, u_name))
                 USER_IDENTIFICATION = int(u_name)
                 speech_output = "You have sucessfully created an account"
         except ValueError:
@@ -446,6 +444,7 @@ def eating_habits():
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
+
 #-----------------------Quiz function---------------#
 def ask_question(request, speech_output):
     global QUIZSCORE
@@ -473,7 +472,7 @@ def ask_question(request, speech_output):
                     "Try saying, ASADA help, for help talking to me"
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
-                card_title, speech_output, reprompt_text, should_end_session))    
+    	card_title, speech_output, reprompt_text, should_end_session))    
 
 def do_quiz(request):
     global QUIZSCORE
@@ -485,11 +484,11 @@ def do_quiz(request):
     STATE = STATE_SURVEY
     return ask_question(request, "")
 
-def answer(request, intent, session):
+def answer(request, intent, session, context):
     global STATE
     
     if STATE == STATE_SURVEY:
-        return answer_quiz(request, intent, session)
+        return answer_quiz(request, intent, session, context)
     session_attributes = {}
     speech_output = "You are not in the Depression screening process at the moment. You can say take the survey or start the survey"
     card_title = "Gave survey answers while not in survey process"
@@ -501,12 +500,13 @@ def answer(request, intent, session):
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
     
-def answer_quiz(request, intent, session):
+def answer_quiz(request, intent, session, context):
     global QUIZSCORE
     global COUNTER
     global STATE
     global USER_IDENTIFICATION
-    
+    #global SURVEY_THERAPIST
+
     speech_message = ""
     quiz_question = ""
     
@@ -520,6 +520,11 @@ def answer_quiz(request, intent, session):
     if COUNTER < len(ITEMS):
         return ask_question(request, "")
     speech_message += get_result(QUIZSCORE)
+    
+    #if QUIZSCORE > 20:
+    #    ft_response = find_therapist(context)
+    #    print(ft_response)
+    #    speech_message += " " + SURVEY_THERAPIST
     
     with conn.cursor() as cursor:
         surveyID = uuid.uuid4()
@@ -547,19 +552,19 @@ def answer_quiz(request, intent, session):
     
 def get_result(score):
     if(score >= 0 and score <= 4):
-        return "based on your screening, You should consult with ASADA at least once every two weeks."
+        return "based on your screening, you should consult with ASADA at least once every two weeks."
     elif(score >= 5 and score <= 9):
-        return "based on your screening, You should consult with ASADA at least once every few days. It is recommended to take the survey every two weeks."
+        return "based on your screening, you should consult with ASADA at least once every few days. It is recommended to take the survey every two weeks."
     elif(score >= 10 and score <= 14):
-        return "based on your screening, You should consult with ASADA at least once a day. It is recommended to take the survey every two weeks."
+        return "based on your screening, you should consult with ASADA at least once a day. It is recommended to take the survey every two weeks."
     elif(score >= 15 and score <= 20):
-        return "based on your screening, You should consult with ASADA once a day." \
+        return "based on your screening, you should consult with ASADA once a day." \
         "It is recommended to seek professional help. It is recommended to take the survey every two weeks."
     elif(score > 20):
-        return "based on your screening, You should consult your doctor about your condition. There are lots of treatment options, " \
-        "and getting onto it as soon as possible could bring your life back. It is recommended to take the survey every two weeks."
+        return "based on your screening, you should consult a therapist about your recent experiences and take the survey once a week. We recommend you use the Find Therapist feature of ASADA."
 
-def get_address(context):
+def find_therapist(context):
+    #global SURVEY_THERAPIST
     deviceId = context['context']['System']['device']['deviceId']
     print(deviceId)
     """This functions gets the location of the User's Alexa device, if they have granted location permissions. """
@@ -576,14 +581,16 @@ def get_address(context):
         print("aaaaa",alexa_location)
         address = "{} {}".format(alexa_location["addressLine1"],
                              alexa_location["city"])
-    elif(r.status_code == 403):
-        speech_output = "Please go to the Alexa app, and allow the permissions for this skill to request your address"
-        reprompt_text = "Please go to the Alexa app, and allow the permissions for this skill to request your address"
+    if(r.status_code == 403):
+        speech_output = "Please go to the Alexa app on your smartphone, and allow the permissions for this skill to request your address"
+        reprompt_text = "Please go to the Alexa app on your smartphone, and allow the permissions for this skill to request your address"
         should_end_session = False;
-        build_response(session_attributes, build_permission_response(speech_output, reprompt_text, should_end_session))
+        session_attributes = {
+            'lastSpoken' : speech_output
+        }
+        return build_response(session_attributes, build_permission_response(speech_output, reprompt_text, should_end_session))
     keyword = "(therapist OR psychiatrist) AND MD"
     g = geocoder.google(address, key='AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s')
-    print("it stops here")
     print(g.latlng)
     latlng = g.latlng
     location = "{},{}".format(latlng[0], latlng[1])
@@ -594,23 +601,25 @@ def get_address(context):
     r2 = requests.get(URL2)
     if r2.status_code == 200:
         first_output = r2.json()
+        doc_place = first_output['results'][0]['name']
+        address = first_output['results'][0]['formatted_address']
+        speech_output = "I have found a possible therapist for you. It is {}. This person is located at {}".format(doc_place, address)
+        #globals()['SURVEY_THERAPIST'] = speech_output
     else:
         print("Sorry, I'm having trouble doing that right now. Please try again later.")
     #print(first_output)
     print("////////////////////////////////////////////////////////////////")
-    address = first_output['results'][0]['formatted_address']
-    speech_output = address
+    
     session_attributes = {
         'lastSpoken' : speech_output
     }
-    card_title = "address function"
+    card_title = "Therapist Function"
     reprompt_text = "I did not understand your command. " \
                     "Try saying, ASADA help, for help talking to me"
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
    
-
 def on_intent(intent_request, session, context):
     """ Called when the user specifies an intent for this skill """
 
@@ -620,8 +629,6 @@ def on_intent(intent_request, session, context):
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
     
-        #for key in event.key():
-    #    message = message + " " + key
     global USER_IDENTIFICATION
     write_to_conversation(USER_IDENTIFICATION, 1, intent_name)
     
@@ -638,7 +645,7 @@ def on_intent(intent_request, session, context):
     elif intent_name == "SurveyIntent":
         return do_quiz(intent_request)
     elif intent_name == "AnswerIntent":
-        return answer(intent_request, intent, session)
+        return answer(intent_request, intent, session, context)
     elif intent_name == "SleepHabits":
         return sleep_habits()
     elif intent_name == "EatingHabits":
@@ -647,14 +654,14 @@ def on_intent(intent_request, session, context):
         return give_thanks()
     elif intent_name == "UserIntroduction":
         return user_intro(intent)
-    elif intent_name == "GetAddress":
-        return get_address(context)
+    elif intent_name == "FindTherapist":
+        return find_therapist(context)
     elif intent_name == "AMAZON.RepeatIntent":
         return repeat_command(session)
     elif intent_name == "CreateAnAccount":
         return createAnAccount(intent)
     else:
-        raise ValueError("Invalid intent")
+        return help_asada()
 
 
 def on_session_ended(session_ended_request, session):
@@ -695,4 +702,3 @@ def lambda_handler(event, context):
         return on_intent(event['request'], event['session'], event)
     elif event['request']['type'] == "SessionEndedRequest":
         return on_session_ended(event['request'], event['session'])
-    
