@@ -481,6 +481,59 @@ def eating_habits():
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
 
+#Notifies the user about changes in survey scores
+def survey_tracker():
+    global USER_IDENTIFICATION
+    card_title = "Survey Tracker"
+    with conn.cursor() as cur:
+        
+        #get most recent survey result
+        cur.execute("select SurveyScore from Survey where UserID = %s order by SurveyDate desc limit 1", [USER_IDENTIFICATION])
+        result_A = cur.fetchone()
+        new_s_res = result_A[0]
+        
+        #get survey result from last week
+        cur.execute("select SurveyScore from Survey where UserID = %s and SurveyDate = DATE_SUB(CURDATE(), INTERVAL 7 DAY) order by SurveyDate desc limit 1",[USER_IDENTIFICATION])
+        result_B = cur.fetchone()
+        old_s_res = result_B[0]
+        
+        if type(result_A) is type(None) and type(result_B) is type(None):
+            #new and old results are empty
+            speech_output = "For the survey tracker to function, you need to take surveys " \
+                            "over the course of a few weeks to see progress."
+        elif type(result_A) is not type(None) and type(result_B) is type(None):
+            #old result is empty but new result is not
+            speech_output = "For the survey tracker to function, you need to take one more " \
+                            "survey in the next few days to see progress."
+        elif type(result_A) is not type(None) and type(result_B) is not type(None):
+            #both results are filled
+            score_diff = float(new_s_res) - float(old_s_res)
+            if score_diff == 0:
+                speech_output = "There has been no change in your well-being since last week."
+            if score_diff > 0:
+                #well-being has reduced
+                if abs(score_diff) > 5:
+                    speech_output = "There has been a major negative change in your well-being since last week."
+                else:
+                    speech_output = "There has been a minor negative change in your well-being since last week."
+            elif score_diff < 0:
+                #well-being has increased
+                if abs(score_diff) > 5:
+                    speech_output = "There has been a major positive change in your well-being since last week."
+                else:
+                    speech_output = "There has been a minor positive change in your well-being since last week."
+        
+        reprompt_text = "I did not understand your command. " \
+                    "Try saying, ASADA help, for help talking to me"
+        should_end_session = False
+        session_attributes = {
+            'lastSpoken' : speech_output
+        }
+        write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
+        return build_response(session_attributes, build_speechlet_response(
+            card_title, speech_output, reprompt_text, should_end_session))
+
+
 #-----------------------Quiz function---------------#
 
 #returns the question for the survey
@@ -707,6 +760,8 @@ def on_intent(intent_request, session, context):
         return repeat_command(session)
     elif intent_name == "CreateAnAccount":
         return createAnAccount(intent)
+    elif intent_name == "SurveyTracker":
+        return survey_tracker()
     else:
         return help_asada()
 
