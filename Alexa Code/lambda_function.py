@@ -197,18 +197,25 @@ Calling this function returns a statement of a list of tasks to try out
 '''
 def help_asada():
     global USER_IDENTIFICATION
+    #card id
     card_title = "help function"
+    #speech output on what asada will say
     speech_output = "You can request a well being survey, ask for general advice, " \
                     "ask specific advice like eating, sleeping and exercise, find a local therapist, " \
                     "or hear a random motivational quote. You will also receive advice " \
                     "in the case that I hear a statement of self harm."
+    #output incase something went wrong
     reprompt_text = "I did not understand your command. " \
                     "Try saying, ASADA help, for help talking to me"
+    #ends session
     should_end_session = False
+    #saves output in case a repeat is called
     session_attributes = {
         'lastSpoken' : speech_output
     }
+    #write conversation to the database
     write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
+    #build the response and let asada reply
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
         
@@ -218,11 +225,12 @@ Allows you to repeat what was last spoken by ASADA
 '''
 def repeat_command(session):
     global LAST_SPOKEN    
-
+    #card intent setup
     card_title = ""
     session_attributes = {}
     speech_output = ""
     reprompt_text = ""
+    #if there is a session previously respond with that response
     if not( session['attributes']['lastSpoken'] is None):
         speech_output = session['attributes']['lastSpoken']
         reprompt_text = speech_output
@@ -231,6 +239,7 @@ def repeat_command(session):
         session_attributes = {
             'lastSpoken' : globals()['LAST_SPOKEN']
         }
+    #for survey
     if (session['attributes']['state'] == STATE_SURVEY):
         session_attributes = {
                 "quizscore":session['attributes']['quizscore'],
@@ -240,6 +249,7 @@ def repeat_command(session):
                 "state": session['attributes']['state'],
                 "counter": session['attributes']['counter'],
         }
+    #build the response to repeat
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
     
@@ -731,10 +741,14 @@ def on_intent(intent_request, session, context):
     print("on_intent requestId=" + intent_request['requestId'] +
           ", sessionId=" + session['sessionId'])
 
+    #reading intent from speach input
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
     
+    #user identification
     global USER_IDENTIFICATION
+
+    #logs the intent name into the conversation table under the user id
     write_to_conversation(USER_IDENTIFICATION, 1, intent_name)
     
     if intent_name == "AMAZON.HelpIntent":
