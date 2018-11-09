@@ -274,15 +274,19 @@ When someone says thank you say you are welcome!
 '''
 def give_thanks():
     global USER_IDENTIFICATION
+    #speech set up with output and reprompt in case something went wrong
     card_title = "Give Thanks"
     speech_output = "You are welcome."
     reprompt_text = "I am sorry I did not understand" \
                     "Try saying, ASADA help, for help talking to me"
     should_end_session = False
+    #session saved in case of repeat intent
     session_attributes = {
         'lastSpoken' : speech_output
     }
+    #write to the database
     write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
+    #build the speech response for asada to speak
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))    
 
@@ -294,6 +298,7 @@ def fortune_cookie():
     global USER_IDENTIFICATION
     card_title = "Fortune Cookie"
     result = ""
+    #pulling from the database and taking a random mixed result then inputting it to the response
     with conn.cursor() as cur:
         cur.execute("select FC_Message from FortuneCookie ORDER BY RAND() LIMIT 1")
         result = cur.fetchone()
@@ -301,10 +306,13 @@ def fortune_cookie():
         reprompt_text = "I did not understand your command. " \
                     "Try saying, ASADA help, for help talking to me"
         should_end_session = False
+        #prepare for the repeat session
         session_attributes = {
             'lastSpoken' : speech_output
         }
+        #write to the database
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
+        #build the speech response for asada to speak
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
  
