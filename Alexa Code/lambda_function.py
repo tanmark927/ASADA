@@ -60,6 +60,7 @@ logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
 
 # --------------- Helpers that build all of the responses ----------------------
 
+@Harry
 #this writes out the conversation date that the user has the ASADA with the messages that are sent and date of messages
 def write_to_conversation(userID, outgoing, message):
     
@@ -71,6 +72,7 @@ def write_to_conversation(userID, outgoing, message):
         cursor.execute(sql)
     conn.commit()
 
+@Harry
 #regular speechlet response builder for Alexa Skill Kit
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
     return {
@@ -91,6 +93,7 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
         },
         'shouldEndSession': should_end_session
     }
+@Harry  
 #fetching permission json card builder for Alexa Skills Kit
 def build_permission_response(output, reprompt_text, should_end_session):
     return {
@@ -113,7 +116,7 @@ def build_permission_response(output, reprompt_text, should_end_session):
         'shouldEndSession': should_end_session
     }
 
-
+@Harry
 #builds the speech response that Alexa outputs 
 def build_response(session_attributes, speechlet_response):
     return {
@@ -136,6 +139,7 @@ ITEMS.append("How often have you had thoughts of hurting yourself in some way?")
 
 # --------------- Functions that control the skill's behavior ------------------
 
+@Harry
 #user gets a response from ASADA when first starting up the system with info on what they can say or ask for help
 def get_welcome_response():
     card_title = "Welcome"
@@ -150,6 +154,7 @@ def get_welcome_response():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
+ @Harry
 #handles when the user wants to exit the ASADA program so ASADA outputs a 'goodbye' speech response once the user finishes using ASADA
 def handle_session_end_request():
     card_title = "Session Ended"
@@ -162,12 +167,14 @@ def handle_session_end_request():
 
 # --------------- Events ------------------
 
+@Harry
 #calls out when the user session started with Alexa
 def on_session_started(session_started_request, session):
     """ Called when the session starts """
     print("on_session_started requestId=" + session_started_request['requestId']
           + ", sessionId=" + session['sessionId'])
 
+@Harry
 #a skill is called on but unspecified so the welcome response runs and Alexa prompts the user to ask for help
 def on_launch(launch_request, session):
     """ Called when the user launches the skill without specifying what they
