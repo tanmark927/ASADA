@@ -1,18 +1,15 @@
 # ASADA
-This is an anti-depression application using Alexa and an Android app.
+This is an anti-depression application using Alexa.
 
 Acronym for Alexa Support Anti-Depression Application
 
 This application is intended to provide guidance to those that are depressed in a variety of forms. 
-We hope to be able to prevent all forms of depression through the help of Alexa.
-A survey will be issued to all users to diagnose the severity of the depression.
-Once the survey is taken, the results will be used as a guideline to better provide
-solutions for the user such as motivational quotes, sleeping advice, and eating advice.
+We hope to alleviate some depression by determining the extent of the depression
+and giving tasks and/or lightening advice to the user base on the depression's extent.
+Some of these include exercise, eating, fortune cookie, etc. advices.
+There is also a suggestion for the nearest therapist should the user request.
 
-ASADA's main purpose is to support and prevent depression that is too 
-great for any person(s).  It is at these times that nobody should stand
-alone.  We hope that Alexa will be there for support when nobody else 
-can.
+(The main code is in Lambda_function.py all others are helper functions for libraries or testing)
 
 
 Collaborators:
@@ -25,11 +22,4 @@ Brian Pham
 
 Mark Tan
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-Fall Upgrade Todo:
-  
-  Process Arbitrary User Responses With No System Crashes
-
-  Suggest Nearby Places for Therapists/Psychatrists
   
