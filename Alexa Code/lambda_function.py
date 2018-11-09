@@ -193,6 +193,7 @@ def calculate_well_being(score):
 
 '''
 Calling this function returns a statement of a list of tasks to try out
+@Brian
 '''
 def help_asada():
     global USER_IDENTIFICATION
@@ -213,6 +214,7 @@ def help_asada():
         
 '''
 Allows you to repeat what was last spoken by ASADA
+@Brian
 '''
 def repeat_command(session):
     global LAST_SPOKEN    
@@ -258,6 +260,7 @@ def death_alert():
 
 '''
 When someone says thank you say you are welcome!
+@Brian
 '''
 def give_thanks():
     global USER_IDENTIFICATION
@@ -275,6 +278,7 @@ def give_thanks():
 
 '''
 Returns a random fortune for you
+@Brian
 '''
 def fortune_cookie():
     global USER_IDENTIFICATION
@@ -719,6 +723,7 @@ def find_therapist(context):
    
 '''
 Looking for an intent that and determining which intent to utilize
+@Brian
 '''
 def on_intent(intent_request, session, context):
     """ Called when the user specifies an intent for this skill """
@@ -733,40 +738,41 @@ def on_intent(intent_request, session, context):
     write_to_conversation(USER_IDENTIFICATION, 1, intent_name)
     
     if intent_name == "AMAZON.HelpIntent":
-        return help_asada()
+        return help_asada() #the help trigger
     elif intent_name == "DeathAlert":
-        return death_alert()
+        return death_alert() #the death alert trigger
     elif intent_name == "FortuneCookie":
-        return fortune_cookie()
+        return fortune_cookie() #the fortune cookie trigger
     elif intent_name == "ExerciseHabits":
-        return exercise_habits()
+        return exercise_habits() #the exercise trigger
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
-        return handle_session_end_request()
+        return handle_session_end_request() #end session trigger
     elif intent_name == "SurveyIntent":
-        return do_quiz(intent_request)
+        return do_quiz(intent_request) #quiz/survey trigger
     elif intent_name == "AnswerIntent":
-        return answer(intent_request, intent, session, context)
+        return answer(intent_request, intent, session, context) #answer trigger
     elif intent_name == "SleepHabits":
-        return sleep_habits()
+        return sleep_habits() #sleeping trigger
     elif intent_name == "EatingHabits":
-        return eating_habits()
+        return eating_habits() #eating trigger
     elif intent_name == "GiveThanks":
-        return give_thanks()
+        return give_thanks() #thank you trigger
     elif intent_name == "UserIntroduction":
-        return user_intro(intent)
+        return user_intro(intent) #user introduction trigger
     elif intent_name == "FindTherapist":
-        return find_therapist(context)
+        return find_therapist(context) #find a therapist trigger
     elif intent_name == "AMAZON.RepeatIntent":
-        return repeat_command(session)
+        return repeat_command(session) #repeating trigger
     elif intent_name == "CreateAnAccount":
-        return createAnAccount(intent)
+        return createAnAccount(intent) #creating an account trigger 
     elif intent_name == "SurveyTracker":
-        return survey_tracker()
+        return survey_tracker() #tracking survey trigger
     else:
-        return help_asada()
+        return help_asada() #if trigger is not recognized use help trigger to get user back on track
 
 '''
 Session is called to end the program.
+@Brian
 '''
 def on_session_ended(session_ended_request, session):
     """ Called when the user ends the session.
