@@ -580,8 +580,10 @@ def survey_tracker():
 
 
 #-----------------------Quiz function---------------#
-
-#returns the question for the survey
+'''
+returns the question for the survey
+@Hung
+'''
 def ask_question(request, speech_output):
     global QUIZSCORE
     global COUNTER
@@ -610,8 +612,11 @@ def ask_question(request, speech_output):
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
     	card_title, speech_output, reprompt_text, should_end_session))    
+'''
+starts the survey, sets the global variables to set into the session attributes
+@Hung
+'''
 
-#starts the survey, sets the global variables to set into the session attributes
 def do_quiz(request):
     global QUIZSCORE
     global COUNTER
@@ -621,10 +626,12 @@ def do_quiz(request):
     QUIZSCORE = 0
     STATE = STATE_SURVEY
     return ask_question(request, "")
-
-#pre-process the answer, checks if the user is in the survey state.
-#returns a question if the user is in the state
-#returns a statement saying the user is not in the state
+'''
+pre-process the answer, checks if the user is in the survey state.
+returns a question if the user is in the state
+returns a statement saying the user is not in the state
+@Hung
+'''
 def answer(request, intent, session, context):
     global STATE
     
@@ -640,8 +647,10 @@ def answer(request, intent, session, context):
     }
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
-
-#processes the survey score, depending on the response.
+'''
+processes the survey score, depending on the response.
+@Hung
+'''
 def answer_quiz(request, intent, session, context):
     global QUIZSCORE
     global COUNTER
@@ -685,8 +694,10 @@ def answer_quiz(request, intent, session, context):
     card_title = "Survey"
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_message, reprompt_text, should_end_session))
-    
-#returns the results, consulting on how many times the user should use ASADA    
+'''
+returns the results, consulting on how many times the user should use ASADA    
+@Hung
+'''
 def get_result(score):
     if(score >= 0 and score <= 4):
         return "based on your screening, you should consult with ASADA at least once every two weeks."
@@ -699,10 +710,12 @@ def get_result(score):
         "It is recommended to seek professional help. It is recommended to take the survey every two weeks."
     elif(score > 20):
         return "based on your screening, you should consult a therapist about your recent experiences and take the survey once a week. We recommend you use the Find Therapist feature of ASADA."
-
-#finds a therapist depending on the user's address. 
-#finds the nearest therapist, depending on the user's device address inside. 
-#returns a permission request if the user have not given permission
+'''
+finds a therapist depending on the user's address. 
+finds the nearest therapist, depending on the user's device address inside. 
+returns a permission request if the user have not given permission
+@Hung
+'''
 def find_therapist(context):
     #global SURVEY_THERAPIST
     deviceId = context['context']['System']['device']['deviceId']
