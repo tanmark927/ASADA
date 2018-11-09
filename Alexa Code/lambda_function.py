@@ -178,7 +178,10 @@ def on_launch(launch_request, session):
     # Dispatch to your skill's launch
     return get_welcome_response()
 
-#Convert actual quiz score to overall well-being
+'''
+Convert actual quiz score to overall well-being
+@Mark
+'''
 def calculate_well_being(score):
     if (score >= 0 and score <= 4):
         return 5;
@@ -307,8 +310,10 @@ def fortune_cookie():
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
- 
-#Allows a user to create an account for ASADA
+'''
+Allows a user to create an account for ASADA
+@Mark
+'''
 def createAnAccount(intent):
     global USER_IDENTIFICATION
     card_title = "Create An Account"
@@ -343,7 +348,10 @@ def createAnAccount(intent):
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
-#Allows user to sign into ASADA
+'''
+Allows user to sign into ASADA
+@Mark
+'''
 def user_intro(intent):
     global USER_IDENTIFICATION
     global QUIZSCORE
@@ -391,7 +399,10 @@ def user_intro(intent):
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
-#Retrieve a piece of exercise advice depending on a user's well-being
+'''
+Retrieve a piece of exercise advice depending on a user's well-being
+@Mark
+'''
 def exercise_habits():
     global USER_IDENTIFICATION
     global QUIZSCORE
@@ -432,7 +443,10 @@ def exercise_habits():
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
 
-#Convert well-being score into severity for advice
+'''
+Convert well-being score into severity for advice
+@Mark
+'''
 def severity_calculator(well_being_score):
     if well_being_score == 5:
         return 1
@@ -445,7 +459,10 @@ def severity_calculator(well_being_score):
     elif well_being_score == 1:
         return 5
 
-#Retrieve a piece of sleeping advice depending on a user's well-being
+'''
+Retrieve a piece of sleeping advice depending on a user's well-being
+@Mark
+'''
 def sleep_habits():
     global USER_IDENTIFICATION
     global QUIZSCORE
@@ -469,8 +486,11 @@ def sleep_habits():
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
-    
-#Retrieve a piece of eating advice based on a user's well-being
+
+'''
+Retrieve a piece of eating advice based on a user's well-being
+@Mark
+'''
 def eating_habits():
     global USER_IDENTIFICATION
     global QUIZSCORE
@@ -495,7 +515,10 @@ def eating_habits():
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
 
-#Notifies the user about changes in survey scores
+'''
+Notifies the user about changes in survey scores
+@Mark
+'''
 def survey_tracker():
     global USER_IDENTIFICATION
     card_title = "Survey Tracker"
