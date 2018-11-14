@@ -755,10 +755,10 @@ def find_therapist(context):
         return build_response(session_attributes, build_permission_response(speech_output, reprompt_text, should_end_session))
     keyword = "(therapist OR psychiatrist) AND MD"
     #finds the lattitude and longitude of the user's address
-    g = geocoder.google(address, key='AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s')
+    g = geocoder.google(address, key='GOOGLE-API-KEY')
     latlng = g.latlng
     location = "{},{}".format(latlng[0], latlng[1])
-    key = "AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s"
+    key = "GOOGLE-API-KEY"
     #set up URL for google's api call
     URL2 = "https://maps.googleapis.com/maps/api/place/textsearch/json?location={}&query={}&key={}".format(location,keyword,key)
     #sends the http request to google's server
