@@ -60,7 +60,6 @@ logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
 
 # --------------- Helpers that build all of the responses ----------------------
 
-@Harry
 #this writes out the conversation date that the user has the ASADA with the messages that are sent and date of messages
 def write_to_conversation(userID, outgoing, message):
     
@@ -72,7 +71,6 @@ def write_to_conversation(userID, outgoing, message):
         cursor.execute(sql)
     conn.commit()
 
-@Harry
 #regular speechlet response builder for Alexa Skill Kit
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
     return {
@@ -93,7 +91,6 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
         },
         'shouldEndSession': should_end_session
     }
-@Harry  
 #fetching permission json card builder for Alexa Skills Kit
 def build_permission_response(output, reprompt_text, should_end_session):
     return {
@@ -116,7 +113,7 @@ def build_permission_response(output, reprompt_text, should_end_session):
         'shouldEndSession': should_end_session
     }
 
-@Harry
+
 #builds the speech response that Alexa outputs 
 def build_response(session_attributes, speechlet_response):
     return {
@@ -139,7 +136,6 @@ ITEMS.append("How often have you had thoughts of hurting yourself in some way?")
 
 # --------------- Functions that control the skill's behavior ------------------
 
-@Harry
 #user gets a response from ASADA when first starting up the system with info on what they can say or ask for help
 def get_welcome_response():
     card_title = "Welcome"
@@ -154,7 +150,6 @@ def get_welcome_response():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
- @Harry
 #handles when the user wants to exit the ASADA program so ASADA outputs a 'goodbye' speech response once the user finishes using ASADA
 def handle_session_end_request():
     card_title = "Session Ended"
@@ -167,14 +162,12 @@ def handle_session_end_request():
 
 # --------------- Events ------------------
 
-@Harry
 #calls out when the user session started with Alexa
 def on_session_started(session_started_request, session):
     """ Called when the session starts """
     print("on_session_started requestId=" + session_started_request['requestId']
           + ", sessionId=" + session['sessionId'])
 
-@Harry
 #a skill is called on but unspecified so the welcome response runs and Alexa prompts the user to ask for help
 def on_launch(launch_request, session):
     """ Called when the user launches the skill without specifying what they
@@ -185,10 +178,7 @@ def on_launch(launch_request, session):
     # Dispatch to your skill's launch
     return get_welcome_response()
 
-'''
-Convert actual quiz score to overall well-being
-@Mark
-'''
+#Convert actual quiz score to overall well-being
 def calculate_well_being(score):
     if (score >= 0 and score <= 4):
         return 5;
@@ -203,44 +193,34 @@ def calculate_well_being(score):
 
 '''
 Calling this function returns a statement of a list of tasks to try out
-@Brian
 '''
 def help_asada():
     global USER_IDENTIFICATION
-    #card id
     card_title = "help function"
-    #speech output on what asada will say
     speech_output = "You can request a well being survey, ask for general advice, " \
                     "ask specific advice like eating, sleeping and exercise, find a local therapist, " \
                     "or hear a random motivational quote. You will also receive advice " \
                     "in the case that I hear a statement of self harm."
-    #output incase something went wrong
     reprompt_text = "I did not understand your command. " \
                     "Try saying, ASADA help, for help talking to me"
-    #ends session
     should_end_session = False
-    #saves output in case a repeat is called
     session_attributes = {
         'lastSpoken' : speech_output
     }
-    #write conversation to the database
     write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
-    #build the response and let asada reply
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
         
 '''
 Allows you to repeat what was last spoken by ASADA
-@Brian
 '''
 def repeat_command(session):
     global LAST_SPOKEN    
-    #card intent setup
+
     card_title = ""
     session_attributes = {}
     speech_output = ""
     reprompt_text = ""
-    #if there is a session previously respond with that response
     if not( session['attributes']['lastSpoken'] is None):
         speech_output = session['attributes']['lastSpoken']
         reprompt_text = speech_output
@@ -249,7 +229,6 @@ def repeat_command(session):
         session_attributes = {
             'lastSpoken' : globals()['LAST_SPOKEN']
         }
-    #for survey
     if (session['attributes']['state'] == STATE_SURVEY):
         session_attributes = {
                 "quizscore":session['attributes']['quizscore'],
@@ -259,7 +238,6 @@ def repeat_command(session):
                 "state": session['attributes']['state'],
                 "counter": session['attributes']['counter'],
         }
-    #build the response to repeat
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
     
@@ -280,35 +258,28 @@ def death_alert():
 
 '''
 When someone says thank you say you are welcome!
-@Brian
 '''
 def give_thanks():
     global USER_IDENTIFICATION
-    #speech set up with output and reprompt in case something went wrong
     card_title = "Give Thanks"
     speech_output = "You are welcome."
     reprompt_text = "I am sorry I did not understand" \
                     "Try saying, ASADA help, for help talking to me"
     should_end_session = False
-    #session saved in case of repeat intent
     session_attributes = {
         'lastSpoken' : speech_output
     }
-    #write to the database
     write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
-    #build the speech response for asada to speak
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))    
 
 '''
 Returns a random fortune for you
-@Brian
 '''
 def fortune_cookie():
     global USER_IDENTIFICATION
     card_title = "Fortune Cookie"
     result = ""
-    #pulling from the database and taking a random mixed result then inputting it to the response
     with conn.cursor() as cur:
         cur.execute("select FC_Message from FortuneCookie ORDER BY RAND() LIMIT 1")
         result = cur.fetchone()
@@ -316,19 +287,14 @@ def fortune_cookie():
         reprompt_text = "I did not understand your command. " \
                     "Try saying, ASADA help, for help talking to me"
         should_end_session = False
-        #prepare for the repeat session
         session_attributes = {
             'lastSpoken' : speech_output
         }
-        #write to the database
         write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
-        #build the speech response for asada to speak
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
-'''
-Allows a user to create an account for ASADA
-@Mark
-'''
+ 
+#Allows a user to create an account for ASADA
 def createAnAccount(intent):
     global USER_IDENTIFICATION
     card_title = "Create An Account"
@@ -363,10 +329,7 @@ def createAnAccount(intent):
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
-'''
-Allows user to sign into ASADA
-@Mark
-'''
+#Allows user to sign into ASADA
 def user_intro(intent):
     global USER_IDENTIFICATION
     global QUIZSCORE
@@ -414,10 +377,7 @@ def user_intro(intent):
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
-'''
-Retrieve a piece of exercise advice depending on a user's well-being
-@Mark
-'''
+#Retrieve a piece of exercise advice depending on a user's well-being
 def exercise_habits():
     global USER_IDENTIFICATION
     global QUIZSCORE
@@ -458,10 +418,7 @@ def exercise_habits():
         return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
 
-'''
-Convert well-being score into severity for advice
-@Mark
-'''
+#Convert well-being score into severity for advice
 def severity_calculator(well_being_score):
     if well_being_score == 5:
         return 1
@@ -474,22 +431,27 @@ def severity_calculator(well_being_score):
     elif well_being_score == 1:
         return 5
 
-'''
-Retrieve a piece of sleeping advice depending on a user's well-being
-@Mark
-'''
-def sleep_habits():
+def specific_habits(intent_name):
     global USER_IDENTIFICATION
     global QUIZSCORE
-    card_title = "Sleep Habits"
-    result = ""
+    card_title = ""
+    query = ""
+    
+    #Change card title and query depending on intent parameter
+    if intent_name == "SleepHabits":
+        card_title = "Sleep Habits"
+        query = "select advice from SleepAdvice where severity = %s ORDER BY RAND() LIMIT 1"
+    elif intent_name == "EatingHabits":
+        card_title = "Eating Habits"
+        query = "select advice from EatingAdvice where severity = %s ORDER BY RAND() LIMIT 1"
+    
+    #Convert quiz score to severity
+    well_being = calculate_well_being(globals()['QUIZSCORE'])
+    severity = severity_calculator(well_being)
+    
+    #Retrieve a random piece of specific advice
     with conn.cursor() as cur:
-        #Convert quiz score to severity
-        well_being = calculate_well_being(globals()['QUIZSCORE'])
-        severity = severity_calculator(well_being)
-
-        #Retrieve a random piece of sleeping advice
-        cur.execute("select advice from SleepAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
+        cur.execute(query, [severity])
         result = cur.fetchone()
         speech_output = result[0]
         reprompt_text = "I did not understand your command. " \
@@ -502,38 +464,7 @@ def sleep_habits():
         return build_response(session_attributes, build_speechlet_response(
             card_title, speech_output, reprompt_text, should_end_session))
 
-'''
-Retrieve a piece of eating advice based on a user's well-being
-@Mark
-'''
-def eating_habits():
-    global USER_IDENTIFICATION
-    global QUIZSCORE
-    card_title = "Eating Habits"
-    result = ""
-    with conn.cursor() as cur:
-        #Convert quiz score to severity
-        well_being = calculate_well_being(globals()['QUIZSCORE'])
-        severity = severity_calculator(well_being)
-
-        #Retrieve a random piece of eating advice
-        cur.execute("select advice from EatingAdvice where severity = %s ORDER BY RAND() LIMIT 1", [severity])
-        result = cur.fetchone()
-        speech_output = result[0]
-        reprompt_text = "I did not understand your command. " \
-                    "Try saying, ASADA help, for help talking to me"
-        should_end_session = False
-        session_attributes = {
-            'lastSpoken' : speech_output
-        }
-        write_to_conversation(USER_IDENTIFICATION, 0, speech_output)
-        return build_response(session_attributes, build_speechlet_response(
-            card_title, speech_output, reprompt_text, should_end_session))
-
-'''
-Notifies the user about changes in survey scores
-@Mark
-'''
+#Notifies the user about changes in survey scores
 def survey_tracker():
     global USER_IDENTIFICATION
     card_title = "Survey Tracker"
@@ -587,10 +518,8 @@ def survey_tracker():
 
 
 #-----------------------Quiz function---------------#
-'''
-returns the question for the survey
-@Hung
-'''
+
+#returns the question for the survey
 def ask_question(request, speech_output):
     global QUIZSCORE
     global COUNTER
@@ -619,11 +548,8 @@ def ask_question(request, speech_output):
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
     	card_title, speech_output, reprompt_text, should_end_session))    
-'''
-starts the survey, sets the global variables to set into the session attributes
-@Hung
-'''
 
+#starts the survey, sets the global variables to set into the session attributes
 def do_quiz(request):
     global QUIZSCORE
     global COUNTER
@@ -633,12 +559,10 @@ def do_quiz(request):
     QUIZSCORE = 0
     STATE = STATE_SURVEY
     return ask_question(request, "")
-'''
-pre-process the answer, checks if the user is in the survey state.
-returns a question if the user is in the state
-returns a statement saying the user is not in the state
-@Hung
-'''
+
+#pre-process the answer, checks if the user is in the survey state.
+#returns a question if the user is in the state
+#returns a statement saying the user is not in the state
 def answer(request, intent, session, context):
     global STATE
     
@@ -654,10 +578,8 @@ def answer(request, intent, session, context):
     }
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
-'''
-processes the survey score, depending on the response.
-@Hung
-'''
+
+#processes the survey score, depending on the response.
 def answer_quiz(request, intent, session, context):
     global QUIZSCORE
     global COUNTER
@@ -701,10 +623,8 @@ def answer_quiz(request, intent, session, context):
     card_title = "Survey"
     return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_message, reprompt_text, should_end_session))
-'''
-returns the results, consulting on how many times the user should use ASADA    
-@Hung
-'''
+    
+#returns the results, consulting on how many times the user should use ASADA    
 def get_result(score):
     if(score >= 0 and score <= 4):
         return "based on your screening, you should consult with ASADA at least once every two weeks."
@@ -717,12 +637,10 @@ def get_result(score):
         "It is recommended to seek professional help. It is recommended to take the survey every two weeks."
     elif(score > 20):
         return "based on your screening, you should consult a therapist about your recent experiences and take the survey once a week. We recommend you use the Find Therapist feature of ASADA."
-'''
-finds a therapist depending on the user's address. 
-finds the nearest therapist, depending on the user's device address inside. 
-returns a permission request if the user have not given permission
-@Hung
-'''
+
+#finds a therapist depending on the user's address. 
+#finds the nearest therapist, depending on the user's device address inside. 
+#returns a permission request if the user have not given permission
 def find_therapist(context):
     #global SURVEY_THERAPIST
     deviceId = context['context']['System']['device']['deviceId']
@@ -755,10 +673,10 @@ def find_therapist(context):
         return build_response(session_attributes, build_permission_response(speech_output, reprompt_text, should_end_session))
     keyword = "(therapist OR psychiatrist) AND MD"
     #finds the lattitude and longitude of the user's address
-    g = geocoder.google(address, key='GOOGLE-API-KEY')
+    g = geocoder.google(address, key='AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s')
     latlng = g.latlng
     location = "{},{}".format(latlng[0], latlng[1])
-    key = "GOOGLE-API-KEY"
+    key = "AIzaSyA-xvMIr9tUpFcHHWSVKdl2ren_qxLLI-s"
     #set up URL for google's api call
     URL2 = "https://maps.googleapis.com/maps/api/place/textsearch/json?location={}&query={}&key={}".format(location,keyword,key)
     #sends the http request to google's server
@@ -784,7 +702,6 @@ def find_therapist(context):
    
 '''
 Looking for an intent that and determining which intent to utilize
-@Brian
 '''
 def on_intent(intent_request, session, context):
     """ Called when the user specifies an intent for this skill """
@@ -792,52 +709,45 @@ def on_intent(intent_request, session, context):
     print("on_intent requestId=" + intent_request['requestId'] +
           ", sessionId=" + session['sessionId'])
 
-    #reading intent from speach input
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
     
-    #user identification
     global USER_IDENTIFICATION
-
-    #logs the intent name into the conversation table under the user id
     write_to_conversation(USER_IDENTIFICATION, 1, intent_name)
     
     if intent_name == "AMAZON.HelpIntent":
-        return help_asada() #the help trigger
+        return help_asada()
     elif intent_name == "DeathAlert":
-        return death_alert() #the death alert trigger
+        return death_alert()
     elif intent_name == "FortuneCookie":
-        return fortune_cookie() #the fortune cookie trigger
+        return fortune_cookie()
     elif intent_name == "ExerciseHabits":
-        return exercise_habits() #the exercise trigger
+        return exercise_habits()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
-        return handle_session_end_request() #end session trigger
+        return handle_session_end_request()
     elif intent_name == "SurveyIntent":
-        return do_quiz(intent_request) #quiz/survey trigger
+        return do_quiz(intent_request)
     elif intent_name == "AnswerIntent":
-        return answer(intent_request, intent, session, context) #answer trigger
-    elif intent_name == "SleepHabits":
-        return sleep_habits() #sleeping trigger
-    elif intent_name == "EatingHabits":
-        return eating_habits() #eating trigger
+        return answer(intent_request, intent, session, context)
+    elif intent_name == "SleepHabits" or intent_name == "EatingHabits":
+        return specific_habits(intent_name)
     elif intent_name == "GiveThanks":
-        return give_thanks() #thank you trigger
+        return give_thanks()
     elif intent_name == "UserIntroduction":
-        return user_intro(intent) #user introduction trigger
+        return user_intro(intent)
     elif intent_name == "FindTherapist":
-        return find_therapist(context) #find a therapist trigger
+        return find_therapist(context)
     elif intent_name == "AMAZON.RepeatIntent":
-        return repeat_command(session) #repeating trigger
+        return repeat_command(session)
     elif intent_name == "CreateAnAccount":
-        return createAnAccount(intent) #creating an account trigger 
+        return createAnAccount(intent)
     elif intent_name == "SurveyTracker":
-        return survey_tracker() #tracking survey trigger
+        return survey_tracker()
     else:
-        return help_asada() #if trigger is not recognized use help trigger to get user back on track
+        return help_asada()
 
 '''
 Session is called to end the program.
-@Brian
 '''
 def on_session_ended(session_ended_request, session):
     """ Called when the user ends the session.
