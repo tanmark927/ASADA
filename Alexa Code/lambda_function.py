@@ -255,8 +255,17 @@ def repeat_command(session):
     #build the response to repeat
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
+<<<<<<< HEAD
     
 #Recommend phone numbers that can help the user with serious issues    
+=======
+
+'''
+EMERGENCY this is not a drill sort of scenario.  If the person causes this
+intent to activate, then it will recommend calling 911 or the suicide
+hotline
+'''
+>>>>>>> commented on help repeat deathalert givethanks fortunecookie onintent onsessionended functions
 def death_alert():
     global USER_IDENTIFICATION
     card_title = "911 emergency function"
